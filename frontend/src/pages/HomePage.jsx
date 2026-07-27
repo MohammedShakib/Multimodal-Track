@@ -3,7 +3,7 @@ import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   Camera,
   Check,
@@ -38,91 +38,93 @@ import {
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api/v1'
 
 const tabs = [
-  { id: 'summary', label: 'Summary', icon: FileText },
+  { id: 'summary', label: 'Notes', icon: FileText },
   { id: 'code', label: 'Code', icon: Code2 },
-  { id: 'flashcards', label: 'Flashcards', icon: Layers },
+  { id: 'flashcards', label: 'Cards', icon: Layers },
+]
+
+const steps = [
+  { label: 'Upload', detail: 'Board image selected' },
+  { label: 'Analyze', detail: 'Vision request completed' },
+  { label: 'Study', detail: 'Summary, code, cards ready' },
 ]
 
 const fadeUpVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  hidden: { opacity: 0, y: 14 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.28 } },
 }
 
 const staggerContainer = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
 }
 
 function EmptyState({ icon: Icon, title, detail }) {
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="flex min-h-[430px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white/50 backdrop-blur-sm px-6 py-10 text-center"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center"
     >
-      <motion.span 
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-xl shadow-emerald-500/30"
-      >
-        <Icon className="h-7 w-7" aria-hidden="true" />
-      </motion.span>
-      <h3 className="text-xl font-bold text-slate-900">{title}</h3>
-      <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-500">{detail}</p>
+      <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-slate-200 bg-white text-emerald-600 shadow-sm">
+        <Icon className="h-6 w-6" aria-hidden="true" />
+      </span>
+      <h3 className="text-base font-semibold text-slate-950">{title}</h3>
+      <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">{detail}</p>
     </motion.div>
   )
 }
 
 function LoadingPanel() {
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative min-h-[430px] overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/50"
+      className="relative min-h-[360px] overflow-hidden rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
     >
-      <div className="absolute inset-x-0 top-0 h-1.5 animate-scan bg-gradient-to-r from-emerald-500 via-sky-500 to-amber-400" />
-      <div className="grid gap-8 lg:grid-cols-[1fr_260px]">
+      <div className="absolute inset-x-0 top-0 h-1 animate-scan bg-gradient-to-r from-emerald-500 via-sky-500 to-amber-400" />
+      <div className="grid gap-6 lg:grid-cols-[1fr_220px]">
         <div>
-          <div className="flex items-center gap-4">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg">
-              <ScanLine className="h-7 w-7 animate-pulse text-emerald-400" aria-hidden="true" />
+          <div className="flex items-start gap-4">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950 text-emerald-400">
+              <ScanLine className="h-5 w-5 animate-pulse" aria-hidden="true" />
             </span>
             <div>
-              <h3 className="text-xl font-bold text-slate-900">
-                Board analysis running
+              <h3 className="text-lg font-semibold text-slate-950">
+                Analysis running
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                Vision model parsing handwriting, diagrams, and code structures.
+                Extracting notes, code blocks, and study prompts.
               </p>
             </div>
           </div>
-          <div className="mt-8 space-y-4">
-            <div className="h-4 w-2/3 animate-pulse rounded-full bg-slate-200" />
-            <div className="h-4 w-full animate-pulse rounded-full bg-slate-100" />
-            <div className="h-4 w-11/12 animate-pulse rounded-full bg-slate-100" />
-            <div className="h-4 w-4/5 animate-pulse rounded-full bg-slate-100" />
-            <div className="h-32 w-full animate-pulse rounded-xl bg-slate-50" />
+          <div className="mt-7 space-y-3">
+            <div className="h-3 w-2/3 animate-pulse rounded-full bg-slate-200" />
+            <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
+            <div className="h-3 w-11/12 animate-pulse rounded-full bg-slate-100" />
+            <div className="h-28 w-full animate-pulse rounded-lg bg-slate-50" />
           </div>
         </div>
-        <div className="grid gap-4">
-          {['Capture', 'Reason', 'Structure'].map((step, index) => (
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
+        <div className="grid gap-3">
+          {['Capture', 'Read', 'Format'].map((step, index) => (
+            <motion.div
+              initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.2 }}
-              key={step} 
-              className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 shadow-sm"
+              transition={{ delay: index * 0.12 }}
+              key={step}
+              className="rounded-lg border border-slate-200 bg-slate-50 p-4"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-sm font-bold text-emerald-600 shadow-sm">
+                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white text-xs font-bold text-emerald-700">
                   {index + 1}
                 </span>
                 <span className="text-sm font-semibold text-slate-800">
                   {step}
                 </span>
               </div>
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-200">
                 <div
-                  className="h-full animate-progress bg-gradient-to-r from-emerald-400 to-sky-400 rounded-full"
+                  className="h-full animate-progress rounded-full bg-emerald-500"
                   style={{ animationDelay: `${index * 180}ms` }}
                 />
               </div>
@@ -134,8 +136,9 @@ function LoadingPanel() {
   )
 }
 
-function ApiSettingsDrawer({ settings, onChange, onClose, onReset }) {
-  const apiReady = Boolean(settings.gemmaApiKey.trim())
+function ApiSettingsDrawer({ settings, backendConfig, onChange, onClose, onReset }) {
+  const localApiReady = Boolean(settings.gemmaApiKey.trim())
+  const apiReady = backendConfig.configured || localApiReady
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -146,59 +149,70 @@ function ApiSettingsDrawer({ settings, onChange, onClose, onReset }) {
         type="button"
         aria-label="Close settings"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/20 backdrop-blur-sm cursor-default"
+        className="absolute inset-0 cursor-default bg-slate-950/30 backdrop-blur-sm"
       />
-      <motion.section 
+      <motion.section
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
-        transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+        transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
         className="relative h-full w-full max-w-md overflow-y-auto bg-white shadow-2xl"
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 bg-white/80 backdrop-blur-md sticky top-0 z-10">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
               Configuration
             </p>
-            <h2 className="mt-1 text-2xl font-bold text-slate-900">
+            <h2 className="mt-1 text-xl font-semibold text-slate-950">
               API Settings
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-900"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-950"
             aria-label="Close settings"
           >
-            <X className="h-5 w-5" aria-hidden="true" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
         <div className="space-y-6 p-6">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-slate-800">
+              <span className="text-sm font-semibold text-slate-800">
                 API status
               </span>
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
-                  apiReady ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ${
+                  apiReady ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                 }`}
               >
-                <div className={`h-1.5 w-1.5 rounded-full ${apiReady ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                {apiReady ? 'Ready' : 'Needs key'}
+                <span className={`h-1.5 w-1.5 rounded-full ${apiReady ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                {backendConfig.configured
+                  ? 'Backend ready'
+                  : localApiReady
+                  ? 'Browser key'
+                  : 'Needs key'}
               </span>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">
-              Local prototype settings are saved in your browser. For production, backend `.env` configuration is recommended.
+            <p className="mt-3 text-xs leading-5 text-slate-500">
+              {backendConfig.configured
+                ? 'Render backend environment variables are configured. Browser API key input is optional.'
+                : 'Add backend environment variables in Render, or use a browser key for local testing.'}
             </p>
+            {backendConfig.configured && (
+              <p className="mt-2 truncate text-xs font-medium text-slate-600">
+                Backend model: {backendConfig.model || 'default'}
+              </p>
+            )}
           </div>
 
           <div className="space-y-5">
-            <label className="block group">
-              <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition-colors group-focus-within:text-emerald-600">
+            <label className="block">
+              <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <Server className="h-4 w-4" aria-hidden="true" />
-                API URL
+                API URL Override
               </span>
               <input
                 type="url"
@@ -206,15 +220,15 @@ function ApiSettingsDrawer({ settings, onChange, onClose, onReset }) {
                 onChange={(event) =>
                   onChange({ ...settings, gemmaApiUrl: event.target.value })
                 }
-                className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
-                placeholder="https://provider.com/v1/..."
+                className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-emerald-500 focus:ring-3 focus:ring-emerald-500/15"
+                placeholder={backendConfig.apiUrl || 'https://provider.com/v1/...'}
               />
             </label>
 
-            <label className="block group">
-              <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition-colors group-focus-within:text-emerald-600">
+            <label className="block">
+              <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <WandSparkles className="h-4 w-4" aria-hidden="true" />
-                Model
+                Model Override
               </span>
               <input
                 type="text"
@@ -222,15 +236,15 @@ function ApiSettingsDrawer({ settings, onChange, onClose, onReset }) {
                 onChange={(event) =>
                   onChange({ ...settings, gemmaModel: event.target.value })
                 }
-                className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
-                placeholder="google/gemma-4-E4B-it"
+                className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-emerald-500 focus:ring-3 focus:ring-emerald-500/15"
+                placeholder={backendConfig.model || 'gemma-4-31b-it'}
               />
             </label>
 
-            <label className="block group">
-              <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition-colors group-focus-within:text-emerald-600">
+            <label className="block">
+              <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <KeyRound className="h-4 w-4" aria-hidden="true" />
-                API Key
+                API Key Override
               </span>
               <input
                 type="password"
@@ -238,21 +252,21 @@ function ApiSettingsDrawer({ settings, onChange, onClose, onReset }) {
                 onChange={(event) =>
                   onChange({ ...settings, gemmaApiKey: event.target.value })
                 }
-                className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
-                placeholder="Paste provider token"
+                className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-emerald-500 focus:ring-3 focus:ring-emerald-500/15"
+                placeholder={backendConfig.configured ? 'Optional' : 'Paste provider token'}
               />
             </label>
           </div>
 
-          <div className="flex items-start gap-3 rounded-xl bg-amber-50/80 p-4 text-sm leading-relaxed text-amber-900 border border-amber-100">
+          <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
             <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
-            <p>API keys are sent from the frontend to backend requests. Use server-side secrets in production.</p>
+            <p>Frontend override keys are visible to the browser. Render backend environment variables are the safer production setup.</p>
           </div>
 
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
           >
             <RotateCcw className="h-4 w-4" aria-hidden="true" />
             Reset Defaults
@@ -284,30 +298,35 @@ function ImageUploader({
   }
 
   return (
-    <motion.section 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50"
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
     >
-      <div className="bg-slate-950 px-6 py-5 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-              Step 1
-            </p>
-            <h2 className="mt-1 text-xl font-bold">Capture whiteboard</h2>
-          </div>
-          <span
-            className={`h-3 w-3 rounded-full shadow-sm ${file ? 'bg-emerald-400 shadow-emerald-400/50' : 'bg-slate-600'}`}
-          />
+      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            Input
+          </p>
+          <h2 className="mt-1 text-lg font-semibold text-slate-950">
+            Capture whiteboard
+          </h2>
         </div>
+        <span
+          className={`inline-flex items-center gap-2 rounded-md px-2.5 py-1 text-xs font-semibold ${
+            file ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+          }`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${file ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+          {file ? 'Image ready' : 'Empty'}
+        </span>
       </div>
 
       <div
-        className={`m-6 flex min-h-80 flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-8 text-center transition-all duration-300 ${
+        className={`m-5 flex min-h-72 flex-col items-center justify-center rounded-lg border border-dashed px-5 py-8 text-center transition ${
           dragging
-            ? 'scale-[1.02] border-sky-500 bg-sky-50/50'
-            : 'border-slate-200 bg-slate-50/50 hover:border-emerald-300 hover:bg-emerald-50/30'
+            ? 'border-sky-500 bg-sky-50'
+            : 'border-slate-300 bg-slate-50 hover:border-emerald-400 hover:bg-emerald-50/60'
         }`}
         onDragOver={(event) => {
           event.preventDefault()
@@ -318,14 +337,14 @@ function ImageUploader({
       >
         <AnimatePresence mode="wait">
           {previewUrl ? (
-            <motion.div 
+            <motion.div
               key="preview"
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
+              exit={{ opacity: 0, scale: 0.98 }}
               className="w-full"
             >
-              <div className="relative mx-auto max-h-72 max-w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="relative mx-auto max-h-72 max-w-full overflow-hidden rounded-lg border border-slate-200 bg-white">
                 <img
                   src={previewUrl}
                   alt="Uploaded whiteboard preview"
@@ -334,13 +353,13 @@ function ImageUploader({
                 <button
                   type="button"
                   onClick={onClear}
-                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-transform hover:scale-110 hover:bg-white"
+                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white/95 text-slate-700 shadow-sm backdrop-blur transition hover:bg-slate-50"
                   aria-label="Remove image"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
-              <p className="mt-4 truncate text-sm font-bold text-slate-800">
+              <p className="mt-4 truncate text-sm font-semibold text-slate-800">
                 {file?.name}
               </p>
               <p className="mt-1 text-xs font-medium text-slate-500">
@@ -348,74 +367,57 @@ function ImageUploader({
               </p>
             </motion.div>
           ) : (
-            <motion.div 
+            <motion.div
               key="empty"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -8 }}
               className="flex flex-col items-center"
             >
-              <span className="flex h-20 w-20 animate-float items-center justify-center rounded-2xl bg-white text-slate-900 shadow-xl shadow-slate-200">
-                <ImageUp className="h-10 w-10 text-emerald-500" aria-hidden="true" />
+              <span className="flex h-14 w-14 items-center justify-center rounded-lg border border-slate-200 bg-white text-emerald-600 shadow-sm">
+                <ImageUp className="h-7 w-7" aria-hidden="true" />
               </span>
-              <h3 className="mt-6 text-2xl font-bold text-slate-900">
+              <h3 className="mt-5 text-xl font-semibold text-slate-950">
                 Drop board image here
               </h3>
-              <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
-                Support for JPG, PNG, or WebP. Take a photo directly from your device.
+              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                JPG, PNG, and WebP are supported.
               </p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      <div className="grid gap-3 px-6 pb-6 sm:grid-cols-3">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+      <div className="grid gap-3 px-5 pb-5 sm:grid-cols-3">
+        <button
           type="button"
           onClick={() => uploadInputRef.current?.click()}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white shadow-md transition-colors hover:bg-slate-800"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
         >
-          <UploadCloud className="h-5 w-5" aria-hidden="true" />
+          <UploadCloud className="h-4 w-4" aria-hidden="true" />
           Upload
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        </button>
+        <button
           type="button"
           onClick={() => cameraInputRef.current?.click()}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
         >
-          <Camera className="h-5 w-5" aria-hidden="true" />
+          <Camera className="h-4 w-4" aria-hidden="true" />
           Camera
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: !file || loading ? 1 : 1.02 }}
-          whileTap={{ scale: !file || loading ? 1 : 0.98 }}
+        </button>
+        <button
           type="button"
           onClick={onAnalyze}
-          disabled={!file || loading}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
+          disabled={!file || loading || !apiReady}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
         >
           {loading ? (
-            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Sparkles className="h-5 w-5" aria-hidden="true" />
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
           )}
           Analyze
-        </motion.button>
-      </div>
-
-      <div className="border-t border-slate-100 bg-slate-50/50 px-6 py-4">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-semibold text-slate-500">API Status</span>
-          <span
-            className={`font-bold tracking-wide uppercase ${apiReady ? 'text-emerald-600' : 'text-amber-600'}`}
-          >
-            {apiReady ? 'Ready' : 'Needs Config'}
-          </span>
-        </div>
+        </button>
       </div>
 
       <input
@@ -442,59 +444,59 @@ function SummaryTab({ markdown }) {
     return (
       <EmptyState
         icon={FileText}
-        title="Summary ekhono nei"
-        detail="Readable board image analyze korle ekhane markdown notes show korbe."
+        title="No summary yet"
+        detail="Run an analysis to generate structured notes from the board."
       />
     )
   }
 
   return (
-    <motion.article 
-      initial={{ opacity: 0, y: 10 }}
+    <motion.article
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="prose prose-slate max-w-none rounded-3xl border border-slate-200 bg-white p-8 text-left shadow-xl shadow-slate-200/50"
+      className="prose prose-slate max-w-none rounded-lg border border-slate-200 bg-white p-6 text-left shadow-sm"
     >
       <ReactMarkdown
         components={{
           h1: ({ children }) => (
-            <h1 className="mb-6 text-3xl font-bold text-slate-900 border-b border-slate-100 pb-4">
+            <h1 className="mb-5 border-b border-slate-100 pb-4 text-2xl font-semibold text-slate-950">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="mb-4 mt-8 text-2xl font-bold text-slate-900">
+            <h2 className="mb-3 mt-7 text-xl font-semibold text-slate-950">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="mb-3 mt-6 text-xl font-bold text-slate-800">
+            <h3 className="mb-3 mt-5 text-lg font-semibold text-slate-800">
               {children}
             </h3>
           ),
           p: ({ children }) => (
-            <p className="mb-4 text-base leading-relaxed text-slate-600">{children}</p>
+            <p className="mb-4 text-sm leading-7 text-slate-600">{children}</p>
           ),
           ul: ({ children }) => (
-            <ul className="mb-6 list-none space-y-3 pl-0 text-base text-slate-600">
+            <ul className="mb-5 list-none space-y-2 pl-0 text-sm text-slate-600">
               {children}
             </ul>
           ),
           li: ({ children, ...props }) => (
-             <li className="flex gap-3" {...props}>
-               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-               <span>{children}</span>
-             </li>
+            <li className="flex gap-3" {...props}>
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+              <span>{children}</span>
+            </li>
           ),
           ol: ({ children }) => (
-            <ol className="mb-6 list-decimal space-y-3 pl-6 text-base text-slate-600 font-medium">
+            <ol className="mb-5 list-decimal space-y-2 pl-6 text-sm text-slate-600">
               {children}
             </ol>
           ),
           strong: ({ children }) => (
-            <strong className="font-bold text-slate-900">{children}</strong>
+            <strong className="font-semibold text-slate-950">{children}</strong>
           ),
           code: ({ children }) => (
-            <code className="rounded-md bg-slate-100 px-1.5 py-0.5 text-sm font-mono text-emerald-600">
+            <code className="rounded bg-slate-100 px-1.5 py-0.5 text-sm text-emerald-700">
               {children}
             </code>
           ),
@@ -514,7 +516,7 @@ function CodeTab({ snippets }) {
       <EmptyState
         icon={Code2}
         title="No code detected"
-        detail="Board-e pseudocode, formula-like logic, ba real code thakle ekhane syntax highlighted output ashbe."
+        detail="Code blocks and pseudocode appear here after analysis."
       />
     )
   }
@@ -527,28 +529,26 @@ function CodeTab({ snippets }) {
   }
 
   return (
-    <motion.div 
+    <motion.div
       variants={staggerContainer}
       initial="hidden"
       animate="visible"
-      className="space-y-6"
+      className="space-y-4"
     >
       {snippets.map((snippet, index) => (
         <motion.section
           variants={fadeUpVariants}
           key={`${snippet.language}-${index}`}
-          className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50"
+          className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-900 px-5 py-4 text-white">
-            <span className="text-sm font-bold uppercase tracking-wider text-emerald-400">
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-950 px-5 py-3 text-white">
+            <span className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
               {snippet.language || 'text'}
             </span>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               type="button"
               onClick={() => copyCode(snippet.code, index)}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-white/10 px-3 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-md bg-white/10 px-3 text-sm font-medium text-white transition hover:bg-white/20"
             >
               {copiedIndex === index ? (
                 <Check className="h-4 w-4 text-emerald-400" aria-hidden="true" />
@@ -556,7 +556,7 @@ function CodeTab({ snippets }) {
                 <Clipboard className="h-4 w-4" aria-hidden="true" />
               )}
               Copy
-            </motion.button>
+            </button>
           </div>
           <div className="p-2">
             <SyntaxHighlighter
@@ -564,9 +564,9 @@ function CodeTab({ snippets }) {
               style={oneLight}
               customStyle={{
                 margin: 0,
-                borderRadius: '0.75rem',
+                borderRadius: '0.5rem',
                 fontSize: 14,
-                lineHeight: 1.7,
+                lineHeight: 1.65,
                 backgroundColor: 'transparent',
               }}
             >
@@ -586,8 +586,8 @@ function FlashcardsTab({ flashcards }) {
     return (
       <EmptyState
         icon={Layers}
-        title="Flashcard ekhono nei"
-        detail="Analyze result theke question-answer pair generate hole ekhane interactive cards dekhabe."
+        title="No cards yet"
+        detail="Question and answer cards appear here after analysis."
       />
     )
   }
@@ -602,11 +602,11 @@ function FlashcardsTab({ flashcards }) {
   }
 
   return (
-    <motion.div 
+    <motion.div
       variants={staggerContainer}
       initial="hidden"
       animate="visible"
-      className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+      className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
     >
       {flashcards.map((card, index) => {
         const flipped = flippedCards.has(index)
@@ -617,33 +617,31 @@ function FlashcardsTab({ flashcards }) {
             key={`${card.question}-${index}`}
             type="button"
             onClick={() => toggleCard(index)}
-            className="group h-72 text-left [perspective:1200px] outline-none"
+            className="group h-64 text-left [perspective:1200px] outline-none"
             aria-pressed={flipped}
           >
             <span
-              className={`relative block h-full w-full transition-all duration-700 [transform-style:preserve-3d] ${
-                flipped ? '[transform:rotateY(180deg)]' : 'group-hover:scale-[1.02] group-hover:shadow-2xl'
+              className={`relative block h-full w-full transition-all duration-500 [transform-style:preserve-3d] ${
+                flipped ? '[transform:rotateY(180deg)]' : 'group-hover:-translate-y-0.5'
               }`}
             >
-              {/* Front */}
-              <span className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/50 [backface-visibility:hidden]">
-                <span className="inline-flex w-fit items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold uppercase tracking-widest text-sky-600">
+              <span className="absolute inset-0 flex flex-col justify-between rounded-lg border border-slate-200 bg-white p-5 shadow-sm [backface-visibility:hidden]">
+                <span className="inline-flex w-fit items-center rounded-md bg-sky-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-sky-700">
                   Question
                 </span>
-                <span className="text-lg font-bold leading-relaxed text-slate-900">
+                <span className="text-base font-semibold leading-7 text-slate-950">
                   {card.question}
                 </span>
-                <span className="text-xs font-semibold text-slate-400 group-hover:text-sky-500 transition-colors">Tap to flip &rarr;</span>
+                <span className="text-xs font-medium text-slate-400">Tap to flip</span>
               </span>
-              {/* Back */}
-              <span className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 shadow-xl shadow-emerald-200/50 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                <span className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-200/50 px-3 py-1 text-xs font-bold uppercase tracking-widest text-emerald-800">
+              <span className="absolute inset-0 flex flex-col justify-between rounded-lg border border-emerald-200 bg-emerald-50 p-5 shadow-sm [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                <span className="inline-flex w-fit items-center rounded-md bg-emerald-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-800">
                   Answer
                 </span>
-                <span className="text-base font-medium leading-relaxed text-slate-800 overflow-y-auto pr-2 custom-scrollbar">
+                <span className="overflow-y-auto pr-2 text-sm font-medium leading-6 text-slate-800">
                   {card.answer}
                 </span>
-                <span className="text-xs font-semibold text-emerald-600 hover:text-emerald-800 transition-colors pt-4">&larr; Tap to return</span>
+                <span className="pt-3 text-xs font-medium text-emerald-700">Tap to return</span>
               </span>
             </span>
           </motion.button>
@@ -653,15 +651,85 @@ function FlashcardsTab({ flashcards }) {
   )
 }
 
-function Metric({ label, value, tone }) {
+function Metric({ label, value, tone, icon: Icon }) {
   return (
-    <motion.div 
-      whileHover={{ y: -4, scale: 1.02 }}
-      className="rounded-3xl border border-slate-200 bg-white px-6 py-5 shadow-lg shadow-slate-200/40 transition-all hover:shadow-xl hover:border-emerald-200"
+    <motion.div
+      variants={fadeUpVariants}
+      className="rounded-lg border border-slate-200 bg-white px-4 py-4 shadow-sm"
     >
-      <div className={`text-3xl font-black tracking-tight ${tone}`}>{value}</div>
-      <div className="mt-2 text-sm font-bold uppercase tracking-wider text-slate-500">{label}</div>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {label}
+        </span>
+        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-50 text-slate-500">
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
+      </div>
+      <div className={`mt-3 text-2xl font-semibold tracking-tight ${tone}`}>
+        {value}
+      </div>
     </motion.div>
+  )
+}
+
+function DashboardSidebar({ apiReady, fileReady, resultReady, onOpenSettings }) {
+  return (
+    <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+      <section className="rounded-lg border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
+              Workspace
+            </p>
+            <h1 className="mt-2 text-xl font-semibold leading-tight">
+              Whiteboard Studio
+            </h1>
+          </div>
+          <Gauge className="h-5 w-5 text-emerald-400" aria-hidden="true" />
+        </div>
+        <div className="mt-5 rounded-lg border border-white/10 bg-white/5 p-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-300">Model API</span>
+            <span className={apiReady ? 'font-semibold text-emerald-300' : 'font-semibold text-amber-300'}>
+              {apiReady ? 'Ready' : 'Needs key'}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-950">Pipeline</h2>
+        <div className="mt-4 space-y-3">
+          {steps.map((step, index) => {
+            const active = index === 0 ? fileReady : index === 1 ? resultReady : resultReady
+            return (
+              <div key={step.label} className="flex gap-3">
+                <span
+                  className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-semibold ${
+                    active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                  }`}
+                >
+                  {index + 1}
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{step.label}</p>
+                  <p className="mt-0.5 text-xs leading-5 text-slate-500">{step.detail}</p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      <button
+        type="button"
+        onClick={onOpenSettings}
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
+      >
+        <Settings2 className="h-4 w-4" aria-hidden="true" />
+        Configure API
+      </button>
+    </aside>
   )
 }
 
@@ -675,10 +743,41 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [settings, setSettings] = useState(getStoredSettings)
+  const [backendConfig, setBackendConfig] = useState({
+    configured: false,
+    apiUrl: '',
+    model: '',
+  })
 
   useEffect(() => {
     persistSettings(settings)
   }, [settings])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    fetch(`${API_URL}/config`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) return null
+        return response.json()
+      })
+      .then((payload) => {
+        if (payload) {
+          setBackendConfig({
+            configured: Boolean(payload.configured),
+            apiUrl: payload.apiUrl ?? '',
+            model: payload.model ?? '',
+          })
+        }
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') {
+          setBackendConfig({ configured: false, apiUrl: '', model: '' })
+        }
+      })
+
+    return () => controller.abort()
+  }, [])
 
   const selectFile = (selectedFile) => {
     if (!selectedFile) return
@@ -705,12 +804,19 @@ export default function HomePage() {
 
   const analyzeImage = async () => {
     if (!file || loading) return
+    if (!apiReady) {
+      toast.error('Add GEMMA_API_KEY in Render backend or use a browser override.')
+      setSettingsOpen(true)
+      return
+    }
 
     const formData = new FormData()
     formData.append('image', file)
-    formData.append('gemmaApiUrl', settings.gemmaApiUrl)
-    formData.append('gemmaModel', settings.gemmaModel)
-    formData.append('gemmaApiKey', settings.gemmaApiKey)
+    if (settings.gemmaApiKey.trim()) {
+      formData.append('gemmaApiUrl', settings.gemmaApiUrl)
+      formData.append('gemmaModel', settings.gemmaModel)
+      formData.append('gemmaApiKey', settings.gemmaApiKey)
+    }
     setLoading(true)
 
     try {
@@ -724,7 +830,7 @@ export default function HomePage() {
       }
       setResult(payload)
       setActiveTab('summary')
-      toast.success('Analysis ready', { icon: '✨' })
+      toast.success('Analysis ready')
     } catch (error) {
       toast.error(error.message)
     } finally {
@@ -748,8 +854,8 @@ export default function HomePage() {
       return (
         <EmptyState
           icon={Sparkles}
-          title="Analysis result goes here"
-          detail="Set API settings, upload a clear board photo, and press Analyze."
+          title="No analysis yet"
+          detail="Upload a board image and run analysis to fill this panel."
         />
       )
     }
@@ -757,10 +863,10 @@ export default function HomePage() {
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
         >
           {activeTab === 'code' && <CodeTab snippets={result.code_snippets ?? []} />}
           {activeTab === 'flashcards' && <FlashcardsTab flashcards={result.flashcards ?? []} />}
@@ -773,178 +879,158 @@ export default function HomePage() {
   const summaryReady = Boolean(result?.markdown_summary)
   const codeCount = result?.code_snippets?.length ?? 0
   const cardCount = result?.flashcards?.length ?? 0
-  const apiReady = Boolean(settings.gemmaApiKey.trim())
+  const localApiReady = Boolean(settings.gemmaApiKey.trim())
+  const apiReady = backendConfig.configured || localApiReady
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-500/30">
-      <div className="fixed inset-0 z-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
-      
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl shadow-sm">
-        <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between px-4 md:px-8">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+    <main className="min-h-screen bg-slate-100 text-slate-950 selection:bg-emerald-500/25">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white shadow-sm">
+        <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-4 md:px-6">
+          <div className="flex min-w-0 items-center gap-3">
             <BrandMark />
-          </motion.div>
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }} 
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3"
-          >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <div className="hidden min-w-0 sm:block">
+              <p className="truncate text-sm font-semibold text-slate-950">
+                Multimodal Track
+              </p>
+              <p className="truncate text-xs text-slate-500">
+                Board analysis dashboard
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
               type="button"
               onClick={() => setSettingsOpen(true)}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
               <Settings2 className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Settings</span>
-            </motion.button>
-            <div className="hidden items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm md:flex">
-              <span className="font-bold text-slate-900">{user?.name}</span>
+            </button>
+            <div className="hidden max-w-48 items-center justify-center truncate rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm md:flex">
+              <span className="truncate font-semibold text-slate-900">{user?.name}</span>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               type="button"
               onClick={signOut}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-slate-900 px-4 text-sm font-bold text-white shadow-md transition-colors hover:bg-slate-800"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Logout</span>
-            </motion.button>
-          </motion.div>
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-[1600px] gap-8 px-4 py-8 lg:grid-cols-[400px_minmax(0,1fr)] lg:px-8">
-        <aside className="space-y-6">
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-3xl bg-slate-950 text-white shadow-2xl shadow-slate-900/30"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(52,211,153,0.15),transparent_50%)]" />
-            <div className="relative p-8">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 backdrop-blur-sm">
-                  <Sparkles className="h-4 w-4" aria-hidden="true" />
-                  Workspace
-                </span>
-                <Gauge className="h-6 w-6 text-emerald-400 opacity-80" aria-hidden="true" />
-              </div>
-              <h1 className="mt-10 text-4xl font-bold leading-tight tracking-tight">
-                Whiteboard to <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sky-400">study kit</span>
-              </h1>
-              <p className="mt-4 text-sm leading-relaxed text-slate-300">
-                Transform any board photo into clean notes, formatted code, and interactive flashcards.
+      <div className="mx-auto grid w-full max-w-[1440px] gap-6 px-4 py-6 md:px-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <DashboardSidebar
+          apiReady={apiReady}
+          fileReady={Boolean(file)}
+          resultReady={Boolean(result)}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
+
+        <section className="min-w-0 space-y-5">
+          <div className="flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                Dashboard
               </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+                Whiteboard to study kit
+              </h1>
             </div>
-            <div className="grid grid-cols-3 border-t border-white/10 bg-white/5 backdrop-blur-md divide-x divide-white/10">
-              <div className="p-5 text-center">
-                <div className="text-2xl font-bold text-white">01</div>
-                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Upload</div>
-              </div>
-              <div className="p-5 text-center">
-                <div className="text-2xl font-bold text-white">02</div>
-                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Analyze</div>
-              </div>
-              <div className="p-5 text-center">
-                <div className="text-2xl font-bold text-emerald-400">03</div>
-                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-emerald-400/80">Study</div>
-              </div>
+            <div className="flex flex-wrap gap-2">
+              <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ${apiReady ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                API {apiReady ? 'ready' : 'needs key'}
+              </span>
+              <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ${file ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-600'}`}>
+                {file ? 'Image selected' : 'No image'}
+              </span>
+              <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ${result ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>
+                {result ? 'Output ready' : 'Waiting'}
+              </span>
             </div>
-          </motion.section>
+          </div>
 
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 bg-white/50 text-sm font-bold text-slate-700 shadow-sm backdrop-blur-sm transition-all hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
-          >
-            <Settings2 className="h-5 w-5" aria-hidden="true" />
-            Configure AI Model Settings
-          </motion.button>
-        </aside>
-
-        <section className="space-y-8">
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="grid gap-6 md:grid-cols-3"
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
           >
-            <motion.div variants={fadeUpVariants}>
-              <Metric
-                label="Summary"
-                value={summaryReady ? 'Ready' : 'Waiting'}
-                tone={summaryReady ? 'text-emerald-500' : 'text-slate-400'}
-              />
-            </motion.div>
-            <motion.div variants={fadeUpVariants}>
-              <Metric label="Code Snippets" value={codeCount} tone="text-sky-500" />
-            </motion.div>
-            <motion.div variants={fadeUpVariants}>
-              <Metric label="Flashcards" value={cardCount} tone="text-amber-500" />
-            </motion.div>
+            <Metric
+              label="Summary"
+              value={summaryReady ? 'Ready' : 'Waiting'}
+              tone={summaryReady ? 'text-emerald-700' : 'text-slate-500'}
+              icon={FileText}
+            />
+            <Metric
+              label="Code Snippets"
+              value={codeCount}
+              tone="text-sky-700"
+              icon={Code2}
+            />
+            <Metric
+              label="Flashcards"
+              value={cardCount}
+              tone="text-amber-700"
+              icon={Layers}
+            />
+            <Metric
+              label="API Status"
+              value={apiReady ? 'Ready' : 'Config'}
+              tone={apiReady ? 'text-emerald-700' : 'text-amber-700'}
+              icon={Server}
+            />
           </motion.div>
 
-          <div className="grid gap-8 xl:grid-cols-[460px_minmax(0,1fr)]">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <ImageUploader
-                file={file}
-                previewUrl={previewUrl}
-                onFileSelect={selectFile}
-                onClear={clearImage}
-                onAnalyze={analyzeImage}
-                loading={loading}
-                apiReady={apiReady}
-              />
-            </motion.div>
+          <div className="grid gap-5 xl:grid-cols-[minmax(360px,440px)_minmax(0,1fr)]">
+            <ImageUploader
+              file={file}
+              previewUrl={previewUrl}
+              onFileSelect={selectFile}
+              onClear={clearImage}
+              onAnalyze={analyzeImage}
+              loading={loading}
+              apiReady={apiReady}
+            />
 
-            <motion.section 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="min-w-0"
+            <motion.section
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="min-w-0 rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
             >
-              <div className="mb-6 inline-flex rounded-2xl border border-slate-200 bg-white/60 p-1.5 shadow-sm backdrop-blur-md">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon
-                  const selected = activeTab === tab.id
+              <div className="mb-5 flex flex-col justify-between gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                    Output
+                  </p>
+                  <h2 className="mt-1 text-lg font-semibold text-slate-950">
+                    Analysis results
+                  </h2>
+                </div>
+                <div className="inline-flex w-full rounded-lg border border-slate-200 bg-slate-50 p-1 sm:w-auto">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon
+                    const selected = activeTab === tab.id
 
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`relative flex min-w-[120px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${
-                        selected ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-900'
-                      }`}
-                    >
-                      {selected && (
-                        <motion.div 
-                          layoutId="activeTab"
-                          className="absolute inset-0 rounded-xl bg-emerald-50 shadow-sm border border-emerald-100" 
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
-                      <Icon className={`relative z-10 h-4 w-4 shrink-0 ${selected ? 'text-emerald-600' : ''}`} aria-hidden="true" />
-                      <span className="relative z-10 truncate">{tab.label}</span>
-                    </button>
-                  )
-                })}
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`relative flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-semibold transition sm:min-w-[96px] sm:gap-2 sm:px-3 sm:text-sm ${
+                          selected ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-950'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span className="truncate">{tab.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-              <div className="min-h-[400px]">
-                {renderActiveTab()}
-              </div>
+              {renderActiveTab()}
             </motion.section>
           </div>
         </section>
@@ -954,6 +1040,7 @@ export default function HomePage() {
         {settingsOpen && (
           <ApiSettingsDrawer
             settings={settings}
+            backendConfig={backendConfig}
             onChange={setSettings}
             onClose={() => setSettingsOpen(false)}
             onReset={resetSettings}
