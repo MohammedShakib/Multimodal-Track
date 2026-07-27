@@ -748,6 +748,8 @@ export default function HomePage() {
 
     const formData = new FormData()
     formData.append('image', file)
+    formData.append('userName', user?.name || '')
+    formData.append('userEmail', user?.email || '')
     if (settings.gemmaApiKey.trim()) {
       formData.append('gemmaApiUrl', settings.gemmaApiUrl)
       formData.append('gemmaModel', settings.gemmaModel)

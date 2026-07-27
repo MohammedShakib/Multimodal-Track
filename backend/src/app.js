@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import boardRoutes from './routes/boardRoutes.js';
+import { getDatabaseStatus } from './services/databaseService.js';
 
 const app = express();
 
@@ -35,8 +36,13 @@ app.get('/', (_req, res) => {
   });
 });
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+app.get('/health', async (_req, res) => {
+  const database = await getDatabaseStatus();
+
+  res.json({
+    status: 'ok',
+    database,
+  });
 });
 
 app.use('/api/v1', boardRoutes);

@@ -25,12 +25,16 @@ cp backend/.env.example backend/.env
 Set these backend values:
 
 ```bash
-GEMMA_API_URL=https://api.deepinfra.com/v1/openai/chat/completions
+GEMMA_API_URL=https://generativelanguage.googleapis.com/v1beta
 GEMMA_API_KEY=your-provider-token
-GEMMA_MODEL=google/gemma-4-E4B-it
+GEMMA_MODEL=gemma-4-31b-it
+DATABASE_URL=postgresql://user:password@host:6543/postgres
 ```
 
-The backend service uses an OpenAI-compatible chat completions payload with a base64 image data URL, so the model endpoint can be swapped for any hosted Gemma 4 vision provider that supports that format.
+`DATABASE_URL` is optional locally. When set, the backend creates a `board_analyses` table and saves each analysis result with image metadata and mock user details.
+
+For Render, add `DATABASE_URL` to the backend service environment variables. Use the Supabase pooler URI, and keep the value out of Git.
+If the database password contains special characters, percent-encode them in the URI. For example, `@` becomes `%40`.
 
 ## Run
 
@@ -54,4 +58,10 @@ POST http://localhost:5000/api/v1/analyze-board
 Content-Type: multipart/form-data
 
 image=<jpg|png|webp file>
+```
+
+Recent saved analyses:
+
+```http
+GET http://localhost:5000/api/v1/analyses
 ```
