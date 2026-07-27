@@ -1,0 +1,24 @@
+{
+  "name": "the-multimodal-track",
+  "version": "1.0.0",
+  "description": "Multimodal whiteboard analyzer with React and Express.",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "start:backend": "npm --prefix backend run start"
+  },
+  "keywords": [
+    "react",
+    "express",
+    "gemma",
+    "whiteboard"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^10.0.4"
+  }
+}
