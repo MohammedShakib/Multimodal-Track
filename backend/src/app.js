@@ -50,14 +50,17 @@ app.use('/api/v1', boardRoutes);
 app.use((err, _req, res, _next) => {
   const statusCode =
     err.statusCode || (err.code === 'LIMIT_FILE_SIZE' ? 413 : 500);
+  const message =
+    err.code === 'LIMIT_FILE_SIZE'
+      ? 'Image size must be under 8MB.'
+      : statusCode === 500
+      ? 'Something went wrong while analyzing the board.'
+      : err.message;
 
   res.status(statusCode).json({
-    message:
-      err.code === 'LIMIT_FILE_SIZE'
-        ? 'Image size must be under 8MB.'
-        : statusCode === 500
-        ? 'Something went wrong while analyzing the board.'
-        : err.message,
+    message,
+    statusCode,
+    code: err.code || 'REQUEST_FAILED',
   });
 });
 

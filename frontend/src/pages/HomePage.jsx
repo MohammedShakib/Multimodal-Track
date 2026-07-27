@@ -5,6 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
+  AlertCircle,
   Camera,
   Check,
   Clipboard,
@@ -169,6 +170,54 @@ function LoadingPanel() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+function ErrorPanel({ error, onOpenSettings }) {
+  if (!error) return null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="min-h-[360px] rounded-lg border border-rose-200 bg-rose-50 p-5 text-left"
+    >
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white text-rose-600 shadow-sm">
+          <AlertCircle className="h-6 w-6" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-lg font-semibold text-rose-950">
+              Analysis failed
+            </h3>
+            {error.statusCode && (
+              <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
+                HTTP {error.statusCode}
+              </span>
+            )}
+          </div>
+          <p className="mt-3 whitespace-pre-wrap break-words rounded-lg border border-rose-200 bg-white p-4 text-sm leading-6 text-rose-900">
+            {error.message}
+          </p>
+          {error.code && (
+            <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-rose-700">
+              {error.code}
+            </p>
+          )}
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-800 shadow-sm transition hover:bg-rose-100"
+            >
+              <Settings2 className="h-4 w-4" aria-hidden="true" />
+              Settings
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -696,6 +745,7 @@ export default function HomePage() {
   const [file, setFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
   const [result, setResult] = useState(null)
+  const [analysisError, setAnalysisError] = useState(null)
   const [activeTab, setActiveTab] = useState('summary')
   const [loading, setLoading] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -774,6 +824,7 @@ export default function HomePage() {
     setFile(selectedFile)
     setPreviewUrl(URL.createObjectURL(selectedFile))
     setResult(null)
+    setAnalysisError(null)
   }
 
   const clearImage = () => {
@@ -781,12 +832,20 @@ export default function HomePage() {
     setFile(null)
     setPreviewUrl('')
     setResult(null)
+    setAnalysisError(null)
   }
 
   const analyzeImage = async () => {
     if (!file || loading) return
     if (!apiReady) {
-      toast.error('Add GEMMA_API_KEY in Render backend or use a browser override.')
+      const configError = {
+        message: 'Add GEMMA_API_KEY in Render backend or use a browser override.',
+        statusCode: 503,
+        code: 'API_NOT_CONFIGURED',
+      }
+      setResult(null)
+      setAnalysisError(configError)
+      toast.error(configError.message)
       setSettingsOpen(true)
       return
     }
@@ -801,20 +860,31 @@ export default function HomePage() {
       formData.append('gemmaApiKey', settings.gemmaApiKey)
     }
     setLoading(true)
+    setAnalysisError(null)
 
     try {
       const response = await fetch(`${API_URL}/analyze-board`, {
         method: 'POST',
         body: formData,
       })
-      const payload = await response.json()
+      const payload = await response.json().catch(() => ({}))
       if (!response.ok) {
-        throw new Error(payload.message || 'Could not analyze this image.')
+        const requestError = new Error(payload.message || 'Could not analyze this image.')
+        requestError.statusCode = payload.statusCode || response.status
+        requestError.code = payload.code || 'ANALYSIS_FAILED'
+        throw requestError
       }
       setResult(payload)
+      setAnalysisError(null)
       setActiveTab('summary')
       toast.success('Analysis ready')
     } catch (error) {
+      setResult(null)
+      setAnalysisError({
+        message: error.message || 'Could not analyze this image.',
+        statusCode: error.statusCode,
+        code: error.code || 'ANALYSIS_FAILED',
+      })
       toast.error(error.message)
     } finally {
       setLoading(false)
@@ -834,6 +904,14 @@ export default function HomePage() {
 
   const renderActiveTab = () => {
     if (loading) return <LoadingPanel />
+    if (analysisError) {
+      return (
+        <ErrorPanel
+          error={analysisError}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
+      )
+    }
     if (!result) {
       return (
         <EmptyState

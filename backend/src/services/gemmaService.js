@@ -28,6 +28,24 @@ function buildImageBase64(file) {
   return file.buffer.toString('base64');
 }
 
+function parseProviderError(details) {
+  const fallback = details.trim();
+
+  try {
+    const payload = JSON.parse(details);
+    const providerError = payload.error || payload;
+
+    return (
+      providerError.message ||
+      providerError.status ||
+      providerError.code ||
+      fallback
+    );
+  } catch {
+    return fallback;
+  }
+}
+
 function extractJson(text) {
   const cleaned = text
     .trim()
@@ -210,13 +228,12 @@ async function analyzeWithGoogleGemini(file, { apiUrl, apiKey, model }) {
 
   if (!response.ok) {
     const details = await response.text();
+    const providerMessage = parseProviderError(details);
     const error = new Error(
-      `Google Gemini API request failed (${response.status}). ${details.slice(
-        0,
-        300,
-      )}`,
+      `Google Gemini API request failed (${response.status}). ${providerMessage.slice(0, 500)}`,
     );
-    error.statusCode = response.status >= 500 ? 502 : 400;
+    error.statusCode = response.status >= 500 ? 502 : response.status;
+    error.code = 'GOOGLE_GEMINI_API_ERROR';
     throw error;
   }
 
@@ -260,10 +277,12 @@ async function analyzeWithOpenAiCompatibleGemma(file, { apiUrl, apiKey, model })
 
   if (!response.ok) {
     const details = await response.text();
+    const providerMessage = parseProviderError(details);
     const error = new Error(
-      `Gemma API request failed (${response.status}). ${details.slice(0, 300)}`,
+      `Gemma API request failed (${response.status}). ${providerMessage.slice(0, 500)}`,
     );
-    error.statusCode = response.status >= 500 ? 502 : 400;
+    error.statusCode = response.status >= 500 ? 502 : response.status;
+    error.code = 'GEMMA_API_ERROR';
     throw error;
   }
 
