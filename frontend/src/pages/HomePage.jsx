@@ -10,7 +10,6 @@ import {
   Clipboard,
   Code2,
   FileText,
-  Gauge,
   ImageUp,
   KeyRound,
   Layers,
@@ -41,12 +40,6 @@ const tabs = [
   { id: 'summary', label: 'Notes', icon: FileText },
   { id: 'code', label: 'Code', icon: Code2 },
   { id: 'flashcards', label: 'Cards', icon: Layers },
-]
-
-const steps = [
-  { label: 'Upload', detail: 'Board image selected' },
-  { label: 'Analyze', detail: 'Vision request completed' },
-  { label: 'Study', detail: 'Summary, code, cards ready' },
 ]
 
 const fadeUpVariants = {
@@ -651,88 +644,6 @@ function FlashcardsTab({ flashcards }) {
   )
 }
 
-function Metric({ label, value, tone, icon: Icon }) {
-  return (
-    <motion.div
-      variants={fadeUpVariants}
-      className="rounded-lg border border-slate-200 bg-white px-4 py-4 shadow-sm"
-    >
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          {label}
-        </span>
-        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-50 text-slate-500">
-          <Icon className="h-4 w-4" aria-hidden="true" />
-        </span>
-      </div>
-      <div className={`mt-3 text-2xl font-semibold tracking-tight ${tone}`}>
-        {value}
-      </div>
-    </motion.div>
-  )
-}
-
-function DashboardSidebar({ apiReady, fileReady, resultReady, onOpenSettings }) {
-  return (
-    <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-      <section className="rounded-lg border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
-              Workspace
-            </p>
-            <h1 className="mt-2 text-xl font-semibold leading-tight">
-              Whiteboard Studio
-            </h1>
-          </div>
-          <Gauge className="h-5 w-5 text-emerald-400" aria-hidden="true" />
-        </div>
-        <div className="mt-5 rounded-lg border border-white/10 bg-white/5 p-3">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-300">Model API</span>
-            <span className={apiReady ? 'font-semibold text-emerald-300' : 'font-semibold text-amber-300'}>
-              {apiReady ? 'Ready' : 'Needs key'}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-950">Pipeline</h2>
-        <div className="mt-4 space-y-3">
-          {steps.map((step, index) => {
-            const active = index === 0 ? fileReady : index === 1 ? resultReady : resultReady
-            return (
-              <div key={step.label} className="flex gap-3">
-                <span
-                  className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-semibold ${
-                    active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
-                  }`}
-                >
-                  {index + 1}
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{step.label}</p>
-                  <p className="mt-0.5 text-xs leading-5 text-slate-500">{step.detail}</p>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      <button
-        type="button"
-        onClick={onOpenSettings}
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
-      >
-        <Settings2 className="h-4 w-4" aria-hidden="true" />
-        Configure API
-      </button>
-    </aside>
-  )
-}
-
 export default function HomePage() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
@@ -876,9 +787,6 @@ export default function HomePage() {
     )
   }
 
-  const summaryReady = Boolean(result?.markdown_summary)
-  const codeCount = result?.code_snippets?.length ?? 0
-  const cardCount = result?.flashcards?.length ?? 0
   const localApiReady = Boolean(settings.gemmaApiKey.trim())
   const apiReady = backendConfig.configured || localApiReady
 
@@ -921,119 +829,54 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className="mx-auto grid w-full max-w-[1440px] gap-6 px-4 py-6 md:px-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <DashboardSidebar
+      <div className="mx-auto grid w-full max-w-[1440px] gap-5 px-4 py-6 md:px-6 xl:grid-cols-[minmax(360px,440px)_minmax(0,1fr)]">
+        <ImageUploader
+          file={file}
+          previewUrl={previewUrl}
+          onFileSelect={selectFile}
+          onClear={clearImage}
+          onAnalyze={analyzeImage}
+          loading={loading}
           apiReady={apiReady}
-          fileReady={Boolean(file)}
-          resultReady={Boolean(result)}
-          onOpenSettings={() => setSettingsOpen(true)}
         />
 
-        <section className="min-w-0 space-y-5">
-          <div className="flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center">
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="min-w-0 rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <div className="mb-5 flex flex-col justify-between gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                Dashboard
+                Output
               </p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-                Whiteboard to study kit
+              <h1 className="mt-1 text-lg font-semibold text-slate-950">
+                Analysis results
               </h1>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ${apiReady ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                API {apiReady ? 'ready' : 'needs key'}
-              </span>
-              <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ${file ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-600'}`}>
-                {file ? 'Image selected' : 'No image'}
-              </span>
-              <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ${result ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>
-                {result ? 'Output ready' : 'Waiting'}
-              </span>
+            <div className="inline-flex w-full rounded-lg border border-slate-200 bg-slate-50 p-1 sm:w-auto">
+              {tabs.map((tab) => {
+                const Icon = tab.icon
+                const selected = activeTab === tab.id
+
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-semibold transition sm:min-w-[96px] sm:gap-2 sm:px-3 sm:text-sm ${
+                      selected ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-950'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span className="truncate">{tab.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
-
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-          >
-            <Metric
-              label="Summary"
-              value={summaryReady ? 'Ready' : 'Waiting'}
-              tone={summaryReady ? 'text-emerald-700' : 'text-slate-500'}
-              icon={FileText}
-            />
-            <Metric
-              label="Code Snippets"
-              value={codeCount}
-              tone="text-sky-700"
-              icon={Code2}
-            />
-            <Metric
-              label="Flashcards"
-              value={cardCount}
-              tone="text-amber-700"
-              icon={Layers}
-            />
-            <Metric
-              label="API Status"
-              value={apiReady ? 'Ready' : 'Config'}
-              tone={apiReady ? 'text-emerald-700' : 'text-amber-700'}
-              icon={Server}
-            />
-          </motion.div>
-
-          <div className="grid gap-5 xl:grid-cols-[minmax(360px,440px)_minmax(0,1fr)]">
-            <ImageUploader
-              file={file}
-              previewUrl={previewUrl}
-              onFileSelect={selectFile}
-              onClear={clearImage}
-              onAnalyze={analyzeImage}
-              loading={loading}
-              apiReady={apiReady}
-            />
-
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="min-w-0 rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="mb-5 flex flex-col justify-between gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                    Output
-                  </p>
-                  <h2 className="mt-1 text-lg font-semibold text-slate-950">
-                    Analysis results
-                  </h2>
-                </div>
-                <div className="inline-flex w-full rounded-lg border border-slate-200 bg-slate-50 p-1 sm:w-auto">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon
-                    const selected = activeTab === tab.id
-
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`relative flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-semibold transition sm:min-w-[96px] sm:gap-2 sm:px-3 sm:text-sm ${
-                          selected ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-950'
-                        }`}
-                      >
-                        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                        <span className="truncate">{tab.label}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-              {renderActiveTab()}
-            </motion.section>
-          </div>
-        </section>
+          {renderActiveTab()}
+        </motion.section>
       </div>
 
       <AnimatePresence>
