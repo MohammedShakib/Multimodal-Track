@@ -17,9 +17,11 @@ export default function SignUpPage() {
     confirmPassword: '',
   })
   const [focused, setFocused] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault()
+    if (submitting) return
     if (!form.name.trim()) {
       toast.error('Enter your full name.')
       return
@@ -36,9 +38,20 @@ export default function SignUpPage() {
       toast.error('Passwords do not match.')
       return
     }
-    signUp({ name: form.name, email: form.email })
-    toast.success('Account created')
-    navigate('/home')
+    setSubmitting(true)
+    try {
+      await signUp({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      })
+      toast.success('Account created')
+      navigate('/home')
+    } catch (error) {
+      toast.error(error.message || 'Could not create account.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const inputStyle = (fieldName) => ({
@@ -234,6 +247,7 @@ export default function SignUpPage() {
               whileHover={{ scale: 1.015 }}
               whileTap={{ scale: 0.985 }}
               type="submit"
+              disabled={submitting}
               style={{
                 marginTop: '0.25rem',
                 width: '100%',
@@ -244,7 +258,7 @@ export default function SignUpPage() {
                 color: '#fff',
                 fontSize: '0.9rem',
                 fontWeight: 600,
-                cursor: 'pointer',
+                cursor: submitting ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -254,7 +268,7 @@ export default function SignUpPage() {
                 transition: 'background 0.2s',
               }}
             >
-              Create account
+              {submitting ? 'Creating...' : 'Create account'}
               <ArrowRight size={16} />
             </motion.button>
           </form>

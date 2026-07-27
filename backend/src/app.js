@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import authRoutes from './routes/authRoutes.js';
 import boardRoutes from './routes/boardRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import { getDatabaseStatus } from './services/databaseService.js';
@@ -11,6 +12,7 @@ const configuredOrigins =
 
 app.use(
   cors({
+    credentials: true,
     origin(origin, callback) {
       if (
         !origin ||
@@ -48,6 +50,7 @@ app.get('/health', async (_req, res) => {
 
 app.use('/api/v1', boardRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/auth', authRoutes);
 
 app.use((err, _req, res, _next) => {
   const statusCode =

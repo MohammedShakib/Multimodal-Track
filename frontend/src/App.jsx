@@ -10,9 +10,17 @@ import SignUpPage from './pages/SignUpPage.jsx'
 import SuperAdminPage from './pages/SuperAdminPage.jsx'
 
 function RouteView() {
-  const { user } = useAuth()
+  const { user, authLoading } = useAuth()
   const pathname = usePathname()
   const navigate = useNavigate()
+
+  if (authLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-100 text-sm font-semibold text-slate-500">
+        Loading...
+      </main>
+    )
+  }
 
   if (pathname === '/home') {
     if (!user) {

@@ -24,14 +24,13 @@ import toast from 'react-hot-toast'
 const API_URL =
   import.meta.env.VITE_API_URL ??
   'https://multimodal-track-backend.onrender.com/api/v1'
-const ADMIN_TOKEN = 'sadmin-secret-token'
 
 const adminFetch = (path, options = {}) =>
   fetch(`${API_URL}/admin${path}`, {
+    credentials: 'include',
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      'x-admin-token': ADMIN_TOKEN,
       ...options.headers,
     },
   })
@@ -296,8 +295,8 @@ export default function SuperAdminPage() {
     }
   }
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/')
   }
 

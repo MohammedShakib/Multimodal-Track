@@ -36,7 +36,9 @@ import {
   persistSettings,
 } from '../lib/gemmaSettings.js'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api/v1'
+const API_URL =
+  import.meta.env.VITE_API_URL ??
+  'https://multimodal-track-backend.onrender.com/api/v1'
 
 const tabs = [
   { id: 'summary', label: 'Notes', icon: FileText },
@@ -765,7 +767,10 @@ export default function HomePage() {
   useEffect(() => {
     const controller = new AbortController()
 
-    fetch(`${API_URL}/config`, { signal: controller.signal })
+    fetch(`${API_URL}/config`, {
+      credentials: 'include',
+      signal: controller.signal,
+    })
       .then(async (response) => {
         if (!response.ok) return null
         return response.json()
@@ -865,6 +870,7 @@ export default function HomePage() {
     try {
       const response = await fetch(`${API_URL}/analyze-board`, {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       })
       const payload = await response.json().catch(() => ({}))
@@ -896,9 +902,9 @@ export default function HomePage() {
     toast.success('API settings reset')
   }
 
-  const signOut = () => {
+  const signOut = async () => {
     setProfileOpen(false)
-    logout()
+    await logout()
     navigate('/')
   }
 

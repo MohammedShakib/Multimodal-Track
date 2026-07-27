@@ -1,9 +1,9 @@
 import { analyzeWhiteboardImage } from '../services/gemmaService.js';
+import { getRequestUser } from './authController.js';
 import {
   getDatabaseStatus,
   getRecentBoardAnalyses,
   saveBoardAnalysis,
-  saveAppUser,
 } from '../services/databaseService.js';
 
 export async function getBoardConfig(_req, res) {
@@ -39,12 +39,14 @@ export async function analyzeBoard(req, res, next) {
     let saved = null;
 
     try {
+      const sessionUser = await getRequestUser(req);
+
       saved = await saveBoardAnalysis({
         file: req.file,
         result,
         user: {
-          name: req.body.userName,
-          email: req.body.userEmail,
+          name: sessionUser?.name || req.body.userName,
+          email: sessionUser?.email || req.body.userEmail,
         },
       });
     } catch (saveError) {
@@ -70,31 +72,6 @@ export async function listBoardAnalyses(req, res, next) {
     });
 
     res.json({ analyses });
-  } catch (error) {
-    next(error);
-  }
-}
-
-export async function registerUser(req, res, next) {
-  try {
-    const { name, email } = req.body;
-
-    if (!email?.trim()) {
-      const error = new Error('Email is required.');
-      error.statusCode = 400;
-      throw error;
-    }
-
-    const user = await saveAppUser({
-      name,
-      email,
-      source: 'auth',
-    });
-
-    res.json({
-      saved: Boolean(user),
-      user,
-    });
   } catch (error) {
     next(error);
   }

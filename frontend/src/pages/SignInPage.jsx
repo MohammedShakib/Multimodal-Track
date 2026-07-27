@@ -12,9 +12,11 @@ export default function SignInPage() {
   const { signIn } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [focused, setFocused] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault()
+    if (submitting) return
 
     // Super admin: skip email validation
     const isSadmin =
@@ -31,14 +33,24 @@ export default function SignInPage() {
       }
     }
 
-    const result = signIn({ email: form.email, password: form.password })
+    setSubmitting(true)
+    try {
+      const signedInUser = await signIn({
+        email: form.email,
+        password: form.password,
+      })
 
-    if (result?.isSuperAdmin) {
-      toast.success('Super Admin access granted')
-      navigate('/super-admin')
-    } else {
-      toast.success('Signed in')
-      navigate('/home')
+      if (signedInUser?.isSuperAdmin) {
+        toast.success('Super Admin access granted')
+        navigate('/super-admin')
+      } else {
+        toast.success('Signed in')
+        navigate('/home')
+      }
+    } catch (error) {
+      toast.error(error.message || 'Could not sign in.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -198,6 +210,7 @@ export default function SignInPage() {
               whileHover={{ scale: 1.015 }}
               whileTap={{ scale: 0.985 }}
               type="submit"
+              disabled={submitting}
               style={{
                 marginTop: '0.25rem',
                 width: '100%',
@@ -208,7 +221,7 @@ export default function SignInPage() {
                 color: '#fff',
                 fontSize: '0.9rem',
                 fontWeight: 600,
-                cursor: 'pointer',
+                cursor: submitting ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -218,7 +231,7 @@ export default function SignInPage() {
                 transition: 'background 0.2s',
               }}
             >
-              Sign in
+              {submitting ? 'Signing in...' : 'Sign in'}
               <ArrowRight size={16} />
             </motion.button>
           </form>

@@ -6,16 +6,20 @@ import {
   deleteUser,
   addUser,
 } from '../services/databaseService.js';
+import { getRequestUser } from '../controllers/authController.js';
 
 const router = express.Router();
 
 // Simple super-admin auth middleware
-function requireSuperAdmin(req, res, next) {
-  const token = req.headers['x-admin-token'];
-  if (token !== 'sadmin-secret-token') {
-    return res.status(401).json({ message: 'Unauthorized' });
+async function requireSuperAdmin(req, res, next) {
+  const sessionUser = await getRequestUser(req);
+
+  if (sessionUser?.is_super_admin) {
+    next();
+    return;
   }
-  next();
+
+  return res.status(401).json({ message: 'Unauthorized' });
 }
 
 // GET /api/v1/admin/health - database + server status

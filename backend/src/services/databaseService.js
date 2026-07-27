@@ -59,9 +59,24 @@ export async function initializeDatabase() {
       name TEXT,
       email TEXT UNIQUE NOT NULL,
       is_super_admin BOOLEAN NOT NULL DEFAULT FALSE,
+      password_hash TEXT,
+      avatar_url TEXT,
       source TEXT NOT NULL DEFAULT 'auth',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    ALTER TABLE app_users
+      ADD COLUMN IF NOT EXISTS password_hash TEXT,
+      ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+
+    CREATE TABLE IF NOT EXISTS app_sessions (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      token_hash TEXT UNIQUE NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      expires_at TIMESTAMPTZ NOT NULL
     );
 
     CREATE INDEX IF NOT EXISTS board_analyses_created_at_idx
@@ -72,6 +87,12 @@ export async function initializeDatabase() {
 
     CREATE INDEX IF NOT EXISTS app_users_last_seen_at_idx
       ON app_users (last_seen_at DESC);
+
+    CREATE INDEX IF NOT EXISTS app_sessions_token_hash_idx
+      ON app_sessions (token_hash);
+
+    CREATE INDEX IF NOT EXISTS app_sessions_expires_at_idx
+      ON app_sessions (expires_at);
   `);
 
   initialized = true;
@@ -103,12 +124,147 @@ export async function saveAppUser({
         is_super_admin = EXCLUDED.is_super_admin,
         source = EXCLUDED.source,
         last_seen_at = NOW()
-      RETURNING id, name, email, is_super_admin, source, created_at, last_seen_at;
+      RETURNING id, name, email, is_super_admin, avatar_url, source, created_at, last_seen_at;
     `,
     [name?.trim() || null, normalizedEmail, Boolean(isSuperAdmin), source],
   );
 
   return saved.rows[0];
+}
+
+export async function findAppUserByEmail(email) {
+  const database = getPool();
+  const normalizedEmail = email?.trim().toLowerCase();
+
+  if (!database || !normalizedEmail) {
+    return null;
+  }
+
+  await initializeDatabase();
+
+  const result = await database.query(
+    `
+      SELECT
+        id,
+        name,
+        email,
+        is_super_admin,
+        password_hash,
+        avatar_url,
+        source,
+        created_at,
+        last_seen_at
+      FROM app_users
+      WHERE email = $1
+      LIMIT 1;
+    `,
+    [normalizedEmail],
+  );
+
+  return result.rows[0] || null;
+}
+
+export async function updateAppUserPassword(userId, passwordHash) {
+  const database = getPool();
+
+  if (!database || !userId || !passwordHash) {
+    return null;
+  }
+
+  await initializeDatabase();
+
+  const result = await database.query(
+    `
+      UPDATE app_users
+      SET password_hash = $2, last_seen_at = NOW()
+      WHERE id = $1
+      RETURNING id, name, email, is_super_admin, avatar_url, source, created_at, last_seen_at;
+    `,
+    [userId, passwordHash],
+  );
+
+  return result.rows[0] || null;
+}
+
+export async function createAppSession({ userId, tokenHash, expiresAt }) {
+  const database = getPool();
+
+  if (!database || !userId || !tokenHash || !expiresAt) {
+    return null;
+  }
+
+  await initializeDatabase();
+
+  const result = await database.query(
+    `
+      INSERT INTO app_sessions (user_id, token_hash, expires_at)
+      VALUES ($1, $2, $3)
+      RETURNING id, user_id, expires_at;
+    `,
+    [userId, tokenHash, expiresAt],
+  );
+
+  return result.rows[0] || null;
+}
+
+export async function getUserBySessionHash(tokenHash) {
+  const database = getPool();
+
+  if (!database || !tokenHash) {
+    return null;
+  }
+
+  await initializeDatabase();
+
+  const result = await database.query(
+    `
+      SELECT
+        u.id,
+        u.name,
+        u.email,
+        u.is_super_admin,
+        u.avatar_url,
+        u.source,
+        u.created_at,
+        u.last_seen_at,
+        s.expires_at AS session_expires_at
+      FROM app_sessions s
+      JOIN app_users u ON u.id = s.user_id
+      WHERE s.token_hash = $1
+        AND s.expires_at > NOW()
+      LIMIT 1;
+    `,
+    [tokenHash],
+  );
+
+  const user = result.rows[0] || null;
+
+  if (user) {
+    await database.query(
+      'UPDATE app_sessions SET last_seen_at = NOW() WHERE token_hash = $1;',
+      [tokenHash],
+    );
+    await database.query(
+      'UPDATE app_users SET last_seen_at = NOW() WHERE id = $1;',
+      [user.id],
+    );
+  }
+
+  return user;
+}
+
+export async function deleteAppSession(tokenHash) {
+  const database = getPool();
+
+  if (!database || !tokenHash) {
+    return false;
+  }
+
+  await initializeDatabase();
+  await database.query('DELETE FROM app_sessions WHERE token_hash = $1', [
+    tokenHash,
+  ]);
+  return true;
 }
 
 export async function getDatabaseStatus() {
