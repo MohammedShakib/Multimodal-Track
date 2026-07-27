@@ -22,6 +22,7 @@ import {
   Settings2,
   Sparkles,
   UploadCloud,
+  UserRound,
   WandSparkles,
   X,
 } from 'lucide-react'
@@ -653,6 +654,8 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState('summary')
   const [loading, setLoading] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileMenuRef = useRef(null)
   const [settings, setSettings] = useState(getStoredSettings)
   const [backendConfig, setBackendConfig] = useState({
     configured: false,
@@ -689,6 +692,28 @@ export default function HomePage() {
 
     return () => controller.abort()
   }, [])
+
+  useEffect(() => {
+    if (!profileOpen) return undefined
+
+    const closeProfileMenu = (event) => {
+      if (!profileMenuRef.current?.contains(event.target)) {
+        setProfileOpen(false)
+      }
+    }
+
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setProfileOpen(false)
+    }
+
+    document.addEventListener('mousedown', closeProfileMenu)
+    document.addEventListener('keydown', closeOnEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', closeProfileMenu)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [profileOpen])
 
   const selectFile = (selectedFile) => {
     if (!selectedFile) return
@@ -755,6 +780,7 @@ export default function HomePage() {
   }
 
   const signOut = () => {
+    setProfileOpen(false)
     logout()
     navigate('/')
   }
@@ -814,17 +840,54 @@ export default function HomePage() {
               <Settings2 className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Settings</span>
             </button>
-            <div className="hidden max-w-48 items-center justify-center truncate rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm md:flex">
-              <span className="truncate font-semibold text-slate-900">{user?.name}</span>
+            <div ref={profileMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setProfileOpen((open) => !open)}
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                aria-expanded={profileOpen}
+                aria-haspopup="menu"
+                aria-label="Open profile menu"
+              >
+                <UserRound className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden max-w-36 truncate sm:inline">
+                  {user?.name || 'Profile'}
+                </span>
+              </button>
+
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                    transition={{ duration: 0.16 }}
+                    className="absolute right-0 top-11 z-50 w-56 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-900/10"
+                    role="menu"
+                  >
+                    <div className="border-b border-slate-100 px-4 py-3">
+                      <p className="truncate text-sm font-semibold text-slate-950">
+                        {user?.name || 'Profile'}
+                      </p>
+                      {user?.email && (
+                        <p className="mt-0.5 truncate text-xs text-slate-500">
+                          {user.email}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={signOut}
+                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+                      role="menuitem"
+                    >
+                      <LogOut className="h-4 w-4" aria-hidden="true" />
+                      Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <button
-              type="button"
-              onClick={signOut}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-            >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
           </div>
         </div>
       </header>
