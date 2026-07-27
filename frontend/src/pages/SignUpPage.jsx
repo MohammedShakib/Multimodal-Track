@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, LockKeyhole, Mail, UserRound } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import BrandMark from '../components/BrandMark.jsx'
 import useAuth from '../context/useAuth.js'
@@ -18,6 +18,15 @@ export default function SignUpPage() {
   })
   const [focused, setFocused] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const emailInputRef = useRef(null)
+  const passwordInputRef = useRef(null)
+  const confirmPasswordInputRef = useRef(null)
+
+  const focusNextOnEnter = (event, nextRef) => {
+    if (event.key !== 'Enter') return
+    event.preventDefault()
+    nextRef.current?.focus()
+  }
 
   const submit = async (event) => {
     event.preventDefault()
@@ -186,6 +195,7 @@ export default function SignUpPage() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 onFocus={() => setFocused('name')}
                 onBlur={() => setFocused(null)}
+                onKeyDown={(event) => focusNextOnEnter(event, emailInputRef)}
                 placeholder="Your name"
                 style={inputStyle('name')}
               />
@@ -198,11 +208,13 @@ export default function SignUpPage() {
                 Email
               </label>
               <input
+                ref={emailInputRef}
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 onFocus={() => setFocused('email')}
                 onBlur={() => setFocused(null)}
+                onKeyDown={(event) => focusNextOnEnter(event, passwordInputRef)}
                 placeholder="you@example.com"
                 style={inputStyle('email')}
               />
@@ -216,11 +228,13 @@ export default function SignUpPage() {
                   Password
                 </label>
                 <input
+                  ref={passwordInputRef}
                   type="password"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   onFocus={() => setFocused('password')}
                   onBlur={() => setFocused(null)}
+                  onKeyDown={(event) => focusNextOnEnter(event, confirmPasswordInputRef)}
                   placeholder="Min 6 chars"
                   style={inputStyle('password')}
                 />
@@ -231,6 +245,7 @@ export default function SignUpPage() {
                   Confirm
                 </label>
                 <input
+                  ref={confirmPasswordInputRef}
                   type="password"
                   value={form.confirmPassword}
                   onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}

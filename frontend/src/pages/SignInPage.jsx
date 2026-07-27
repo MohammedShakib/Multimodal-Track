@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, LockKeyhole, Mail } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import BrandMark from '../components/BrandMark.jsx'
 import useAuth from '../context/useAuth.js'
@@ -13,6 +13,13 @@ export default function SignInPage() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [focused, setFocused] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const passwordInputRef = useRef(null)
+
+  const focusPasswordOnEnter = (event) => {
+    if (event.key !== 'Enter') return
+    event.preventDefault()
+    passwordInputRef.current?.focus()
+  }
 
   const submit = async (event) => {
     event.preventDefault()
@@ -185,6 +192,7 @@ export default function SignInPage() {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 onFocus={() => setFocused('email')}
                 onBlur={() => setFocused(null)}
+                onKeyDown={focusPasswordOnEnter}
                 placeholder="you@example.com"
                 style={inputStyle('email')}
               />
@@ -196,6 +204,7 @@ export default function SignInPage() {
                 Password
               </label>
               <input
+                ref={passwordInputRef}
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
