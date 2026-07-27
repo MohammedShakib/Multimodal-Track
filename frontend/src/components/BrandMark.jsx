@@ -1,28 +1,19 @@
-import { Sparkles } from 'lucide-react'
+import logoMarkUrl from '../assets/logo-mark.png'
 import { Link } from '../lib/router.jsx'
 
-export default function BrandMark({ dark = false }) {
+export default function BrandMark() {
   return (
-    <Link to="/" className="inline-flex items-center gap-3">
-      <span
-        className={`flex h-10 w-10 items-center justify-center ${
-          dark ? 'bg-white text-slate-950' : 'bg-slate-950 text-white'
-        }`}
-      >
-        <Sparkles className="h-5 w-5" aria-hidden="true" />
-      </span>
-      <span>
-        <span
-          className={`block text-sm font-semibold uppercase ${
-            dark ? 'text-white' : 'text-slate-950'
-          }`}
-        >
-          Multimodal Track
-        </span>
-        <span className={`text-xs ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-          Whiteboard AI Studio
-        </span>
-      </span>
+    <Link
+      to="/"
+      className="inline-flex h-14 w-14 shrink-0 items-center justify-center"
+      aria-label="Multimodal Track"
+    >
+      <img
+        src={logoMarkUrl}
+        alt=""
+        className="h-full w-full object-contain drop-shadow-[0_0_14px_rgba(14,165,233,0.28)]"
+        aria-hidden="true"
+      />
     </Link>
   )
 }

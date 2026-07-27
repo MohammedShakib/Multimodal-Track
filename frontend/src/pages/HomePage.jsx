@@ -3,6 +3,7 @@ import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Camera,
   Check,
@@ -42,67 +43,94 @@ const tabs = [
   { id: 'flashcards', label: 'Flashcards', icon: Layers },
 ]
 
+const fadeUpVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+}
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+}
+
 function EmptyState({ icon: Icon, title, detail }) {
   return (
-    <div className="flex min-h-[430px] flex-col items-center justify-center border border-dashed border-slate-300 bg-white/80 px-6 py-10 text-center">
-      <span className="mb-5 flex h-16 w-16 items-center justify-center bg-slate-950 text-white shadow-lg shadow-slate-300/60">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex min-h-[430px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white/50 backdrop-blur-sm px-6 py-10 text-center"
+    >
+      <motion.span 
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-xl shadow-emerald-500/30"
+      >
         <Icon className="h-7 w-7" aria-hidden="true" />
-      </span>
-      <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
-      <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">{detail}</p>
-    </div>
+      </motion.span>
+      <h3 className="text-xl font-bold text-slate-900">{title}</h3>
+      <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-500">{detail}</p>
+    </motion.div>
   )
 }
 
 function LoadingPanel() {
   return (
-    <div className="relative min-h-[430px] overflow-hidden border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
-      <div className="absolute inset-x-0 top-0 h-1 animate-scan bg-gradient-to-r from-emerald-500 via-sky-500 to-amber-400" />
-      <div className="grid gap-6 lg:grid-cols-[1fr_240px]">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative min-h-[430px] overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/50"
+    >
+      <div className="absolute inset-x-0 top-0 h-1.5 animate-scan bg-gradient-to-r from-emerald-500 via-sky-500 to-amber-400" />
+      <div className="grid gap-8 lg:grid-cols-[1fr_260px]">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center bg-slate-950 text-white">
-              <ScanLine className="h-6 w-6 animate-pulse" aria-hidden="true" />
+          <div className="flex items-center gap-4">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg">
+              <ScanLine className="h-7 w-7 animate-pulse text-emerald-400" aria-hidden="true" />
             </span>
             <div>
-              <h3 className="text-lg font-semibold text-slate-950">
+              <h3 className="text-xl font-bold text-slate-900">
                 Board analysis running
               </h3>
-              <p className="text-sm text-slate-500">
-                Vision model handwriting, diagrams, and code-like text parse korche.
+              <p className="mt-1 text-sm text-slate-500">
+                Vision model parsing handwriting, diagrams, and code structures.
               </p>
             </div>
           </div>
           <div className="mt-8 space-y-4">
-            <div className="h-4 w-2/3 animate-pulse bg-slate-200" />
-            <div className="h-4 w-full animate-pulse bg-slate-100" />
-            <div className="h-4 w-11/12 animate-pulse bg-slate-100" />
-            <div className="h-4 w-4/5 animate-pulse bg-slate-100" />
-            <div className="h-24 w-full animate-pulse bg-slate-100" />
+            <div className="h-4 w-2/3 animate-pulse rounded-full bg-slate-200" />
+            <div className="h-4 w-full animate-pulse rounded-full bg-slate-100" />
+            <div className="h-4 w-11/12 animate-pulse rounded-full bg-slate-100" />
+            <div className="h-4 w-4/5 animate-pulse rounded-full bg-slate-100" />
+            <div className="h-32 w-full animate-pulse rounded-xl bg-slate-50" />
           </div>
         </div>
-        <div className="grid gap-3">
+        <div className="grid gap-4">
           {['Capture', 'Reason', 'Structure'].map((step, index) => (
-            <div key={step} className="border border-slate-200 bg-slate-50 p-4">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.2 }}
+              key={step} 
+              className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 shadow-sm"
+            >
               <div className="flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center bg-white text-sm font-semibold text-slate-700">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-sm font-bold text-emerald-600 shadow-sm">
                   {index + 1}
                 </span>
                 <span className="text-sm font-semibold text-slate-800">
                   {step}
                 </span>
               </div>
-              <div className="mt-4 h-2 overflow-hidden bg-white">
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
                 <div
-                  className="h-full animate-progress bg-sky-500"
+                  className="h-full animate-progress bg-gradient-to-r from-emerald-400 to-sky-400 rounded-full"
                   style={{ animationDelay: `${index * 180}ms` }}
                 />
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -110,117 +138,127 @@ function ApiSettingsDrawer({ settings, onChange, onClose, onReset }) {
   const apiReady = Boolean(settings.gemmaApiKey.trim())
 
   return (
-    <div className="fixed inset-0 z-40">
-      <button
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         type="button"
         aria-label="Close settings"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-slate-950/20 backdrop-blur-sm cursor-default"
       />
-      <section className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <motion.section 
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+        className="relative h-full w-full max-w-md overflow-y-auto bg-white shadow-2xl"
+      >
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 bg-white/80 backdrop-blur-md sticky top-0 z-10">
           <div>
-            <p className="text-xs font-semibold uppercase text-emerald-700">
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">
               Configuration
             </p>
-            <h2 className="mt-1 text-xl font-semibold text-slate-950">
-              Gemma API Settings
+            <h2 className="mt-1 text-2xl font-bold text-slate-900">
+              API Settings
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center bg-slate-100 text-slate-700 hover:bg-slate-200"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-900"
             aria-label="Close settings"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="space-y-5 p-5">
-          <div className="border border-slate-200 bg-slate-50 p-4">
+        <div className="space-y-6 p-6">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-slate-800">
+              <span className="text-sm font-bold text-slate-800">
                 API status
               </span>
               <span
-                className={`text-sm font-semibold ${
-                  apiReady ? 'text-emerald-700' : 'text-amber-700'
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
+                  apiReady ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                 }`}
               >
+                <div className={`h-1.5 w-1.5 rounded-full ${apiReady ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                 {apiReady ? 'Ready' : 'Needs key'}
               </span>
             </div>
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Local prototype-e settings browser-e save hoy. Production deploy-e
-              backend `.env` use kora better.
+            <p className="mt-3 text-xs leading-relaxed text-slate-500">
+              Local prototype settings are saved in your browser. For production, backend `.env` configuration is recommended.
             </p>
           </div>
 
-          <label className="block">
-            <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
-              <Server className="h-3.5 w-3.5" aria-hidden="true" />
-              API URL
-            </span>
-            <input
-              type="url"
-              value={settings.gemmaApiUrl}
-              onChange={(event) =>
-                onChange({ ...settings, gemmaApiUrl: event.target.value })
-              }
-              className="h-12 w-full border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-sky-500"
-              placeholder="https://provider.com/v1/openai/chat/completions"
-            />
-          </label>
+          <div className="space-y-5">
+            <label className="block group">
+              <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition-colors group-focus-within:text-emerald-600">
+                <Server className="h-4 w-4" aria-hidden="true" />
+                API URL
+              </span>
+              <input
+                type="url"
+                value={settings.gemmaApiUrl}
+                onChange={(event) =>
+                  onChange({ ...settings, gemmaApiUrl: event.target.value })
+                }
+                className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                placeholder="https://provider.com/v1/..."
+              />
+            </label>
 
-          <label className="block">
-            <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
-              <WandSparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              Model
-            </span>
-            <input
-              type="text"
-              value={settings.gemmaModel}
-              onChange={(event) =>
-                onChange({ ...settings, gemmaModel: event.target.value })
-              }
-              className="h-12 w-full border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-sky-500"
-              placeholder="google/gemma-4-E4B-it"
-            />
-          </label>
+            <label className="block group">
+              <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition-colors group-focus-within:text-emerald-600">
+                <WandSparkles className="h-4 w-4" aria-hidden="true" />
+                Model
+              </span>
+              <input
+                type="text"
+                value={settings.gemmaModel}
+                onChange={(event) =>
+                  onChange({ ...settings, gemmaModel: event.target.value })
+                }
+                className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                placeholder="google/gemma-4-E4B-it"
+              />
+            </label>
 
-          <label className="block">
-            <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
-              <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
-              API Key
-            </span>
-            <input
-              type="password"
-              value={settings.gemmaApiKey}
-              onChange={(event) =>
-                onChange({ ...settings, gemmaApiKey: event.target.value })
-              }
-              className="h-12 w-full border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-sky-500"
-              placeholder="Paste provider token"
-            />
-          </label>
+            <label className="block group">
+              <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition-colors group-focus-within:text-emerald-600">
+                <KeyRound className="h-4 w-4" aria-hidden="true" />
+                API Key
+              </span>
+              <input
+                type="password"
+                value={settings.gemmaApiKey}
+                onChange={(event) =>
+                  onChange({ ...settings, gemmaApiKey: event.target.value })
+                }
+                className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                placeholder="Paste provider token"
+              />
+            </label>
+          </div>
 
-          <div className="flex items-start gap-3 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-            <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            API key frontend theke backend-e request-er sathe jay. Shared
-            production app-e server-side secret use korben.
+          <div className="flex items-start gap-3 rounded-xl bg-amber-50/80 p-4 text-sm leading-relaxed text-amber-900 border border-amber-100">
+            <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
+            <p>API keys are sent from the frontend to backend requests. Use server-side secrets in production.</p>
           </div>
 
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300"
           >
             <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            Reset API defaults
+            Reset Defaults
           </button>
         </div>
-      </section>
+      </motion.section>
     </div>
   )
 }
@@ -246,26 +284,30 @@ function ImageUploader({
   }
 
   return (
-    <section className="overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-200/70">
-      <div className="border-b border-slate-200 bg-slate-950 px-5 py-4 text-white">
+    <motion.section 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50"
+    >
+      <div className="bg-slate-950 px-6 py-5 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase text-emerald-300">
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">
               Step 1
             </p>
-            <h2 className="mt-1 text-lg font-semibold">Capture whiteboard</h2>
+            <h2 className="mt-1 text-xl font-bold">Capture whiteboard</h2>
           </div>
           <span
-            className={`h-2.5 w-2.5 ${file ? 'bg-emerald-400' : 'bg-slate-500'}`}
+            className={`h-3 w-3 rounded-full shadow-sm ${file ? 'bg-emerald-400 shadow-emerald-400/50' : 'bg-slate-600'}`}
           />
         </div>
       </div>
 
       <div
-        className={`m-5 flex min-h-80 flex-col items-center justify-center border border-dashed px-5 py-8 text-center transition ${
+        className={`m-6 flex min-h-80 flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-8 text-center transition-all duration-300 ${
           dragging
-            ? 'scale-[1.01] border-sky-500 bg-sky-50'
-            : 'border-slate-300 bg-slate-50 hover:border-slate-400'
+            ? 'scale-[1.02] border-sky-500 bg-sky-50/50'
+            : 'border-slate-200 bg-slate-50/50 hover:border-emerald-300 hover:bg-emerald-50/30'
         }`}
         onDragOver={(event) => {
           event.preventDefault()
@@ -274,85 +316,104 @@ function ImageUploader({
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
       >
-        {previewUrl ? (
-          <div className="w-full">
-            <div className="relative mx-auto max-h-72 max-w-full overflow-hidden border border-slate-200 bg-white">
-              <img
-                src={previewUrl}
-                alt="Uploaded whiteboard preview"
-                className="mx-auto max-h-72 w-full object-contain"
-              />
-              <button
-                type="button"
-                onClick={onClear}
-                className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center bg-white text-slate-700 shadow-sm hover:bg-slate-100"
-                aria-label="Remove image"
-              >
-                <X className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
-            <p className="mt-4 truncate text-sm font-semibold text-slate-800">
-              {file?.name}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              {(file?.size / 1024 / 1024).toFixed(2)} MB selected
-            </p>
-          </div>
-        ) : (
-          <>
-            <span className="flex h-16 w-16 animate-float items-center justify-center bg-white text-slate-950 shadow-lg shadow-slate-300/70">
-              <ImageUp className="h-8 w-8" aria-hidden="true" />
-            </span>
-            <h3 className="mt-6 text-xl font-semibold text-slate-950">
-              Drop board image here
-            </h3>
-            <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-              Clear JPG, PNG, ba WebP upload korun. Phone camera diye direct
-              capture kora jabe.
-            </p>
-          </>
-        )}
+        <AnimatePresence mode="wait">
+          {previewUrl ? (
+            <motion.div 
+              key="preview"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="w-full"
+            >
+              <div className="relative mx-auto max-h-72 max-w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <img
+                  src={previewUrl}
+                  alt="Uploaded whiteboard preview"
+                  className="mx-auto max-h-72 w-full object-contain"
+                />
+                <button
+                  type="button"
+                  onClick={onClear}
+                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-transform hover:scale-110 hover:bg-white"
+                  aria-label="Remove image"
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+              <p className="mt-4 truncate text-sm font-bold text-slate-800">
+                {file?.name}
+              </p>
+              <p className="mt-1 text-xs font-medium text-slate-500">
+                {(file?.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="empty"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex flex-col items-center"
+            >
+              <span className="flex h-20 w-20 animate-float items-center justify-center rounded-2xl bg-white text-slate-900 shadow-xl shadow-slate-200">
+                <ImageUp className="h-10 w-10 text-emerald-500" aria-hidden="true" />
+              </span>
+              <h3 className="mt-6 text-2xl font-bold text-slate-900">
+                Drop board image here
+              </h3>
+              <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
+                Support for JPG, PNG, or WebP. Take a photo directly from your device.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <div className="grid gap-3 px-5 pb-5 sm:grid-cols-3">
-        <button
+      <div className="grid gap-3 px-6 pb-6 sm:grid-cols-3">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => uploadInputRef.current?.click()}
-          className="inline-flex h-12 items-center justify-center gap-2 bg-slate-950 px-4 text-sm font-semibold text-white hover:bg-slate-800"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white shadow-md transition-colors hover:bg-slate-800"
         >
-          <UploadCloud className="h-4 w-4" aria-hidden="true" />
+          <UploadCloud className="h-5 w-5" aria-hidden="true" />
           Upload
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => cameraInputRef.current?.click()}
-          className="inline-flex h-12 items-center justify-center gap-2 border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300"
         >
-          <Camera className="h-4 w-4" aria-hidden="true" />
+          <Camera className="h-5 w-5" aria-hidden="true" />
           Camera
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: !file || loading ? 1 : 1.02 }}
+          whileTap={{ scale: !file || loading ? 1 : 0.98 }}
           type="button"
           onClick={onAnalyze}
           disabled={!file || loading}
-          className="inline-flex h-12 items-center justify-center gap-2 bg-emerald-600 px-4 text-sm font-semibold text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
         >
           {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
           ) : (
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
           )}
           Analyze
-        </button>
+        </motion.button>
       </div>
 
-      <div className="border-t border-slate-200 px-5 py-3">
+      <div className="border-t border-slate-100 bg-slate-50/50 px-6 py-4">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-500">API status</span>
+          <span className="font-semibold text-slate-500">API Status</span>
           <span
-            className={`font-semibold ${apiReady ? 'text-emerald-700' : 'text-amber-700'}`}
+            className={`font-bold tracking-wide uppercase ${apiReady ? 'text-emerald-600' : 'text-amber-600'}`}
           >
-            {apiReady ? 'Ready from settings' : 'Needs key or backend env'}
+            {apiReady ? 'Ready' : 'Needs Config'}
           </span>
         </div>
       </div>
@@ -372,7 +433,7 @@ function ImageUploader({
         className="hidden"
         onChange={(event) => onFileSelect(event.target.files?.[0])}
       />
-    </section>
+    </motion.section>
   )
 }
 
@@ -388,42 +449,52 @@ function SummaryTab({ markdown }) {
   }
 
   return (
-    <article className="border border-slate-200 bg-white p-6 text-left shadow-xl shadow-slate-200/70">
+    <motion.article 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="prose prose-slate max-w-none rounded-3xl border border-slate-200 bg-white p-8 text-left shadow-xl shadow-slate-200/50"
+    >
       <ReactMarkdown
         components={{
           h1: ({ children }) => (
-            <h1 className="mb-4 text-2xl font-semibold text-slate-950">
+            <h1 className="mb-6 text-3xl font-bold text-slate-900 border-b border-slate-100 pb-4">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="mb-3 mt-6 text-xl font-semibold text-slate-950">
+            <h2 className="mb-4 mt-8 text-2xl font-bold text-slate-900">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="mb-2 mt-5 text-base font-semibold text-slate-900">
+            <h3 className="mb-3 mt-6 text-xl font-bold text-slate-800">
               {children}
             </h3>
           ),
           p: ({ children }) => (
-            <p className="mb-3 text-sm leading-7 text-slate-700">{children}</p>
+            <p className="mb-4 text-base leading-relaxed text-slate-600">{children}</p>
           ),
           ul: ({ children }) => (
-            <ul className="mb-4 list-disc space-y-2 pl-6 text-sm leading-7 text-slate-700">
+            <ul className="mb-6 list-none space-y-3 pl-0 text-base text-slate-600">
               {children}
             </ul>
           ),
+          li: ({ children, ...props }) => (
+             <li className="flex gap-3" {...props}>
+               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+               <span>{children}</span>
+             </li>
+          ),
           ol: ({ children }) => (
-            <ol className="mb-4 list-decimal space-y-2 pl-6 text-sm leading-7 text-slate-700">
+            <ol className="mb-6 list-decimal space-y-3 pl-6 text-base text-slate-600 font-medium">
               {children}
             </ol>
           ),
           strong: ({ children }) => (
-            <strong className="font-semibold text-slate-950">{children}</strong>
+            <strong className="font-bold text-slate-900">{children}</strong>
           ),
           code: ({ children }) => (
-            <code className="bg-slate-100 px-1.5 py-0.5 text-sm text-slate-900">
+            <code className="rounded-md bg-slate-100 px-1.5 py-0.5 text-sm font-mono text-emerald-600">
               {children}
             </code>
           ),
@@ -431,7 +502,7 @@ function SummaryTab({ markdown }) {
       >
         {markdown}
       </ReactMarkdown>
-    </article>
+    </motion.article>
   )
 }
 
@@ -442,7 +513,7 @@ function CodeTab({ snippets }) {
     return (
       <EmptyState
         icon={Code2}
-        title="Code snippet paoa jayni"
+        title="No code detected"
         detail="Board-e pseudocode, formula-like logic, ba real code thakle ekhane syntax highlighted output ashbe."
       />
     )
@@ -456,44 +527,55 @@ function CodeTab({ snippets }) {
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div 
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
       {snippets.map((snippet, index) => (
-        <section
+        <motion.section
+          variants={fadeUpVariants}
           key={`${snippet.language}-${index}`}
-          className="overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-200/70"
+          className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50"
         >
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-950 px-4 py-3 text-white">
-            <span className="text-sm font-semibold uppercase">
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-900 px-5 py-4 text-white">
+            <span className="text-sm font-bold uppercase tracking-wider text-emerald-400">
               {snippet.language || 'text'}
             </span>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="button"
               onClick={() => copyCode(snippet.code, index)}
-              className="inline-flex h-9 items-center justify-center gap-2 bg-white px-3 text-sm font-medium text-slate-900 hover:bg-slate-100"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-white/10 px-3 text-sm font-semibold text-white transition-colors hover:bg-white/20"
             >
               {copiedIndex === index ? (
-                <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                <Check className="h-4 w-4 text-emerald-400" aria-hidden="true" />
               ) : (
                 <Clipboard className="h-4 w-4" aria-hidden="true" />
               )}
               Copy
-            </button>
+            </motion.button>
           </div>
-          <SyntaxHighlighter
-            language={snippet.language || 'text'}
-            style={oneLight}
-            customStyle={{
-              margin: 0,
-              borderRadius: 0,
-              fontSize: 14,
-              lineHeight: 1.7,
-            }}
-          >
-            {snippet.code}
-          </SyntaxHighlighter>
-        </section>
+          <div className="p-2">
+            <SyntaxHighlighter
+              language={snippet.language || 'text'}
+              style={oneLight}
+              customStyle={{
+                margin: 0,
+                borderRadius: '0.75rem',
+                fontSize: 14,
+                lineHeight: 1.7,
+                backgroundColor: 'transparent',
+              }}
+            >
+              {snippet.code}
+            </SyntaxHighlighter>
+          </div>
+        </motion.section>
       ))}
-    </div>
+    </motion.div>
   )
 }
 
@@ -520,55 +602,66 @@ function FlashcardsTab({ flashcards }) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <motion.div 
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+      className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+    >
       {flashcards.map((card, index) => {
         const flipped = flippedCards.has(index)
 
         return (
-          <button
+          <motion.button
+            variants={fadeUpVariants}
             key={`${card.question}-${index}`}
             type="button"
             onClick={() => toggleCard(index)}
-            className="h-64 text-left [perspective:1200px]"
+            className="group h-72 text-left [perspective:1200px] outline-none"
             aria-pressed={flipped}
           >
             <span
-              className={`relative block h-full w-full transition duration-500 [transform-style:preserve-3d] ${
-                flipped ? '[transform:rotateY(180deg)]' : ''
+              className={`relative block h-full w-full transition-all duration-700 [transform-style:preserve-3d] ${
+                flipped ? '[transform:rotateY(180deg)]' : 'group-hover:scale-[1.02] group-hover:shadow-2xl'
               }`}
             >
-              <span className="absolute inset-0 flex flex-col justify-between border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/70 [backface-visibility:hidden]">
-                <span className="text-xs font-semibold uppercase text-sky-700">
+              {/* Front */}
+              <span className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/50 [backface-visibility:hidden]">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold uppercase tracking-widest text-sky-600">
                   Question
                 </span>
-                <span className="text-base font-semibold leading-7 text-slate-950">
+                <span className="text-lg font-bold leading-relaxed text-slate-900">
                   {card.question}
                 </span>
-                <span className="text-xs text-slate-500">Tap to flip</span>
+                <span className="text-xs font-semibold text-slate-400 group-hover:text-sky-500 transition-colors">Tap to flip &rarr;</span>
               </span>
-              <span className="absolute inset-0 flex flex-col justify-between border border-emerald-200 bg-emerald-50 p-5 shadow-xl shadow-emerald-100 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                <span className="text-xs font-semibold uppercase text-emerald-700">
+              {/* Back */}
+              <span className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 shadow-xl shadow-emerald-200/50 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-200/50 px-3 py-1 text-xs font-bold uppercase tracking-widest text-emerald-800">
                   Answer
                 </span>
-                <span className="text-sm leading-7 text-slate-800">
+                <span className="text-base font-medium leading-relaxed text-slate-800 overflow-y-auto pr-2 custom-scrollbar">
                   {card.answer}
                 </span>
-                <span className="text-xs text-emerald-700">Tap to return</span>
+                <span className="text-xs font-semibold text-emerald-600 hover:text-emerald-800 transition-colors pt-4">&larr; Tap to return</span>
               </span>
             </span>
-          </button>
+          </motion.button>
         )
       })}
-    </div>
+    </motion.div>
   )
 }
 
 function Metric({ label, value, tone }) {
   return (
-    <div className="border border-slate-200 bg-white px-4 py-3 shadow-sm">
-      <div className={`text-xl font-semibold ${tone}`}>{value}</div>
-      <div className="mt-1 text-xs text-slate-500">{label}</div>
-    </div>
+    <motion.div 
+      whileHover={{ y: -4, scale: 1.02 }}
+      className="rounded-3xl border border-slate-200 bg-white px-6 py-5 shadow-lg shadow-slate-200/40 transition-all hover:shadow-xl hover:border-emerald-200"
+    >
+      <div className={`text-3xl font-black tracking-tight ${tone}`}>{value}</div>
+      <div className="mt-2 text-sm font-bold uppercase tracking-wider text-slate-500">{label}</div>
+    </motion.div>
   )
 }
 
@@ -631,7 +724,7 @@ export default function HomePage() {
       }
       setResult(payload)
       setActiveTab('summary')
-      toast.success('Analysis ready')
+      toast.success('Analysis ready', { icon: '✨' })
     } catch (error) {
       toast.error(error.message)
     } finally {
@@ -655,16 +748,26 @@ export default function HomePage() {
       return (
         <EmptyState
           icon={Sparkles}
-          title="Analysis result ekhane show korbe"
-          detail="API settings set kore whiteboard-er clear photo upload korun, then Analyze press korun."
+          title="Analysis result goes here"
+          detail="Set API settings, upload a clear board photo, and press Analyze."
         />
       )
     }
-    if (activeTab === 'code') return <CodeTab snippets={result.code_snippets ?? []} />
-    if (activeTab === 'flashcards') {
-      return <FlashcardsTab flashcards={result.flashcards ?? []} />
-    }
-    return <SummaryTab markdown={result.markdown_summary} />
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+        >
+          {activeTab === 'code' && <CodeTab snippets={result.code_snippets ?? []} />}
+          {activeTab === 'flashcards' && <FlashcardsTab flashcards={result.flashcards ?? []} />}
+          {activeTab === 'summary' && <SummaryTab markdown={result.markdown_summary} />}
+        </motion.div>
+      </AnimatePresence>
+    )
   }
 
   const summaryReady = Boolean(result?.markdown_summary)
@@ -673,102 +776,146 @@ export default function HomePage() {
   const apiReady = Boolean(settings.gemmaApiKey.trim())
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(135deg,#f8fafc_0%,#eef6f4_45%,#f8f5ef_100%)] text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-[1500px] items-center justify-between px-4 md:px-6">
-          <BrandMark />
-          <div className="flex items-center gap-2">
-            <button
+    <main className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-500/30">
+      <div className="fixed inset-0 z-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
+      
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl shadow-sm">
+        <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between px-4 md:px-8">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+            <BrandMark />
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }} 
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-3"
+          >
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="button"
               onClick={() => setSettingsOpen(true)}
-              className="inline-flex h-10 items-center justify-center gap-2 border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
             >
               <Settings2 className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">API Settings</span>
-            </button>
-            <div className="hidden border border-slate-200 bg-slate-50 px-3 py-2 text-sm md:block">
-              <span className="font-semibold text-slate-900">{user?.name}</span>
+              <span className="hidden sm:inline">Settings</span>
+            </motion.button>
+            <div className="hidden items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm md:flex">
+              <span className="font-bold text-slate-900">{user?.name}</span>
             </div>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="button"
               onClick={signOut}
-              className="inline-flex h-10 items-center justify-center gap-2 bg-slate-950 px-3 text-sm font-semibold text-white hover:bg-slate-800"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-slate-900 px-4 text-sm font-bold text-white shadow-md transition-colors hover:bg-slate-800"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Logout</span>
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </div>
       </header>
 
-      <div className="mx-auto grid w-full max-w-[1500px] gap-5 px-4 py-5 lg:grid-cols-[380px_minmax(0,1fr)] lg:px-6">
-        <aside className="space-y-5">
-          <section className="overflow-hidden border border-slate-200 bg-slate-950 text-white shadow-2xl shadow-slate-300/60">
-            <div className="p-6">
+      <div className="relative z-10 mx-auto grid w-full max-w-[1600px] gap-8 px-4 py-8 lg:grid-cols-[400px_minmax(0,1fr)] lg:px-8">
+        <aside className="space-y-6">
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-3xl bg-slate-950 text-white shadow-2xl shadow-slate-900/30"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(52,211,153,0.15),transparent_50%)]" />
+            <div className="relative p-8">
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 text-xs font-semibold uppercase text-emerald-200">
-                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                  Home workspace
+                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 backdrop-blur-sm">
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  Workspace
                 </span>
-                <Gauge className="h-5 w-5 text-sky-200" aria-hidden="true" />
+                <Gauge className="h-6 w-6 text-emerald-400 opacity-80" aria-hidden="true" />
               </div>
-              <h1 className="mt-8 text-4xl font-semibold leading-tight">
-                Whiteboard to study kit
+              <h1 className="mt-10 text-4xl font-bold leading-tight tracking-tight">
+                Whiteboard to <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sky-400">study kit</span>
               </h1>
-              <p className="mt-4 text-sm leading-6 text-slate-300">
-                Board photo theke clean notes, code, and flashcards ek workflow-e.
+              <p className="mt-4 text-sm leading-relaxed text-slate-300">
+                Transform any board photo into clean notes, formatted code, and interactive flashcards.
               </p>
             </div>
-            <div className="grid grid-cols-3 border-t border-white/10">
-              <div className="p-4">
-                <div className="text-xl font-semibold">01</div>
-                <div className="mt-1 text-xs text-slate-400">Upload</div>
+            <div className="grid grid-cols-3 border-t border-white/10 bg-white/5 backdrop-blur-md divide-x divide-white/10">
+              <div className="p-5 text-center">
+                <div className="text-2xl font-bold text-white">01</div>
+                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Upload</div>
               </div>
-              <div className="border-x border-white/10 p-4">
-                <div className="text-xl font-semibold">02</div>
-                <div className="mt-1 text-xs text-slate-400">Analyze</div>
+              <div className="p-5 text-center">
+                <div className="text-2xl font-bold text-white">02</div>
+                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Analyze</div>
               </div>
-              <div className="p-4">
-                <div className="text-xl font-semibold">03</div>
-                <div className="mt-1 text-xs text-slate-400">Study</div>
+              <div className="p-5 text-center">
+                <div className="text-2xl font-bold text-emerald-400">03</div>
+                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-emerald-400/80">Study</div>
               </div>
             </div>
-          </section>
+          </motion.section>
 
-          <button
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => setSettingsOpen(true)}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 border border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+            className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 bg-white/50 text-sm font-bold text-slate-700 shadow-sm backdrop-blur-sm transition-all hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
           >
-            <Settings2 className="h-4 w-4" aria-hidden="true" />
-            Configure Gemma API
-          </button>
+            <Settings2 className="h-5 w-5" aria-hidden="true" />
+            Configure AI Model Settings
+          </motion.button>
         </aside>
 
-        <section className="space-y-5">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Metric
-              label="Summary"
-              value={summaryReady ? 'Ready' : 'Waiting'}
-              tone={summaryReady ? 'text-emerald-700' : 'text-slate-700'}
-            />
-            <Metric label="Code snippets" value={codeCount} tone="text-sky-700" />
-            <Metric label="Flashcards" value={cardCount} tone="text-amber-700" />
-          </div>
+        <section className="space-y-8">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="grid gap-6 md:grid-cols-3"
+          >
+            <motion.div variants={fadeUpVariants}>
+              <Metric
+                label="Summary"
+                value={summaryReady ? 'Ready' : 'Waiting'}
+                tone={summaryReady ? 'text-emerald-500' : 'text-slate-400'}
+              />
+            </motion.div>
+            <motion.div variants={fadeUpVariants}>
+              <Metric label="Code Snippets" value={codeCount} tone="text-sky-500" />
+            </motion.div>
+            <motion.div variants={fadeUpVariants}>
+              <Metric label="Flashcards" value={cardCount} tone="text-amber-500" />
+            </motion.div>
+          </motion.div>
 
-          <div className="grid gap-5 xl:grid-cols-[440px_minmax(0,1fr)]">
-            <ImageUploader
-              file={file}
-              previewUrl={previewUrl}
-              onFileSelect={selectFile}
-              onClear={clearImage}
-              onAnalyze={analyzeImage}
-              loading={loading}
-              apiReady={apiReady}
-            />
+          <div className="grid gap-8 xl:grid-cols-[460px_minmax(0,1fr)]">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <ImageUploader
+                file={file}
+                previewUrl={previewUrl}
+                onFileSelect={selectFile}
+                onClear={clearImage}
+                onAnalyze={analyzeImage}
+                loading={loading}
+                apiReady={apiReady}
+              />
+            </motion.div>
 
-            <section className="min-w-0">
-              <div className="mb-3 grid grid-cols-3 border border-slate-200 bg-white p-1 shadow-sm">
+            <motion.section 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="min-w-0"
+            >
+              <div className="mb-6 inline-flex rounded-2xl border border-slate-200 bg-white/60 p-1.5 shadow-sm backdrop-blur-md">
                 {tabs.map((tab) => {
                   const Icon = tab.icon
                   const selected = activeTab === tab.id
@@ -778,32 +925,41 @@ export default function HomePage() {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id)}
-                      className={`inline-flex h-12 min-w-0 items-center justify-center gap-2 px-3 text-sm font-semibold transition ${
-                        selected
-                          ? 'bg-slate-950 text-white shadow-lg shadow-slate-300'
-                          : 'text-slate-600 hover:bg-slate-100'
+                      className={`relative flex min-w-[120px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${
+                        selected ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-900'
                       }`}
                     >
-                      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                      <span className="truncate">{tab.label}</span>
+                      {selected && (
+                        <motion.div 
+                          layoutId="activeTab"
+                          className="absolute inset-0 rounded-xl bg-emerald-50 shadow-sm border border-emerald-100" 
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                      <Icon className={`relative z-10 h-4 w-4 shrink-0 ${selected ? 'text-emerald-600' : ''}`} aria-hidden="true" />
+                      <span className="relative z-10 truncate">{tab.label}</span>
                     </button>
                   )
                 })}
               </div>
-              {renderActiveTab()}
-            </section>
+              <div className="min-h-[400px]">
+                {renderActiveTab()}
+              </div>
+            </motion.section>
           </div>
         </section>
       </div>
 
-      {settingsOpen ? (
-        <ApiSettingsDrawer
-          settings={settings}
-          onChange={setSettings}
-          onClose={() => setSettingsOpen(false)}
-          onReset={resetSettings}
-        />
-      ) : null}
+      <AnimatePresence>
+        {settingsOpen && (
+          <ApiSettingsDrawer
+            settings={settings}
+            onChange={setSettings}
+            onClose={() => setSettingsOpen(false)}
+            onReset={resetSettings}
+          />
+        )}
+      </AnimatePresence>
     </main>
   )
 }
