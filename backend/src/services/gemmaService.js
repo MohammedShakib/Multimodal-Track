@@ -104,14 +104,15 @@ function getAssistantText(responseJson) {
   return typeof content === 'string' ? content.trim() : '';
 }
 
-export async function analyzeWhiteboardImage(file) {
-  const apiUrl = process.env.GEMMA_API_URL;
-  const apiKey = process.env.GEMMA_API_KEY;
-  const model = process.env.GEMMA_MODEL || 'google/gemma-4-E4B-it';
+export async function analyzeWhiteboardImage(file, config = {}) {
+  const apiUrl = config.apiUrl?.trim() || process.env.GEMMA_API_URL;
+  const apiKey = config.apiKey?.trim() || process.env.GEMMA_API_KEY;
+  const model =
+    config.model?.trim() || process.env.GEMMA_MODEL || 'google/gemma-4-E4B-it';
 
   if (!apiUrl || !apiKey || apiKey === 'replace-with-your-provider-token') {
     const error = new Error(
-      'Gemma API is not configured. Set GEMMA_API_URL, GEMMA_API_KEY, and GEMMA_MODEL in backend/.env.',
+      'Gemma API is not configured. Add API settings in the app or set GEMMA_API_URL, GEMMA_API_KEY, and GEMMA_MODEL in backend/.env.',
     );
     error.statusCode = 503;
     throw error;

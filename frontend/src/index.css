@@ -2,6 +2,8 @@
 
 @theme {
   --animate-scan: scan 1.8s ease-in-out infinite;
+  --animate-progress: progress 1.35s ease-in-out infinite;
+  --animate-float: float 2.8s ease-in-out infinite;
 
   @keyframes scan {
     0% {
@@ -12,6 +14,31 @@
     }
     100% {
       transform: translateX(100%);
+    }
+  }
+
+  @keyframes progress {
+    0% {
+      width: 15%;
+      transform: translateX(-20%);
+    }
+    50% {
+      width: 70%;
+      transform: translateX(35%);
+    }
+    100% {
+      width: 15%;
+      transform: translateX(620%);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
     }
   }
 }
@@ -39,6 +66,10 @@ body {
 button,
 input {
   font: inherit;
+}
+
+input::placeholder {
+  color: #94a3b8;
 }
 
 button {

@@ -8,7 +8,11 @@ export async function analyzeBoard(req, res, next) {
       throw error;
     }
 
-    const result = await analyzeWhiteboardImage(req.file);
+    const result = await analyzeWhiteboardImage(req.file, {
+      apiUrl: req.body.gemmaApiUrl,
+      apiKey: req.body.gemmaApiKey,
+      model: req.body.gemmaModel,
+    });
     res.json(result);
   } catch (error) {
     next(error);

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -6,72 +6,216 @@ import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import {
   Camera,
   Check,
+  ChevronRight,
   Clipboard,
   Code2,
   FileText,
+  Gauge,
   ImageUp,
+  KeyRound,
   Layers,
   Loader2,
+  LockKeyhole,
+  RotateCcw,
+  ScanLine,
+  Server,
+  Settings2,
   Sparkles,
   UploadCloud,
+  WandSparkles,
   X,
 } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api/v1'
+const SETTINGS_KEY = 'multimodal-track-gemma-settings'
+
+const defaultSettings = {
+  gemmaApiUrl: 'https://api.deepinfra.com/v1/openai/chat/completions',
+  gemmaModel: 'google/gemma-4-E4B-it',
+  gemmaApiKey: '',
+}
 
 const tabs = [
-  { id: 'summary', label: '📝 Summary', icon: FileText },
-  { id: 'code', label: '💻 Code', icon: Code2 },
-  { id: 'flashcards', label: '🃏 Flashcards', icon: Layers },
+  { id: 'summary', label: 'Summary', icon: FileText },
+  { id: 'code', label: 'Code', icon: Code2 },
+  { id: 'flashcards', label: 'Flashcards', icon: Layers },
 ]
+
+function getStoredSettings() {
+  try {
+    return {
+      ...defaultSettings,
+      ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'),
+    }
+  } catch {
+    return defaultSettings
+  }
+}
 
 function EmptyState({ icon: Icon, title, detail }) {
   return (
-    <div className="flex min-h-72 flex-col items-center justify-center border border-dashed border-zinc-300 bg-white px-6 py-10 text-center">
-      <Icon className="mb-4 h-9 w-9 text-zinc-400" aria-hidden="true" />
-      <h3 className="text-base font-semibold text-zinc-950">{title}</h3>
-      <p className="mt-2 max-w-md text-sm text-zinc-500">{detail}</p>
+    <div className="flex min-h-[420px] flex-col items-center justify-center border border-dashed border-slate-300 bg-white/80 px-6 py-10 text-center">
+      <span className="mb-5 flex h-16 w-16 items-center justify-center bg-slate-950 text-white shadow-lg shadow-slate-300/60">
+        <Icon className="h-7 w-7" aria-hidden="true" />
+      </span>
+      <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
+      <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">{detail}</p>
     </div>
   )
 }
 
 function LoadingPanel() {
   return (
-    <div className="relative min-h-72 overflow-hidden border border-zinc-200 bg-white p-6">
+    <div className="relative min-h-[420px] overflow-hidden border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
       <div className="absolute inset-x-0 top-0 h-1 animate-scan bg-gradient-to-r from-emerald-500 via-sky-500 to-amber-400" />
-      <div className="flex items-center gap-3 border-b border-zinc-200 pb-5">
-        <div className="flex h-10 w-10 items-center justify-center bg-zinc-950 text-white">
-          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-        </div>
+      <div className="grid gap-6 lg:grid-cols-[1fr_240px]">
         <div>
-          <h3 className="text-base font-semibold text-zinc-950">
-            Board scan cholche
-          </h3>
-          <p className="text-sm text-zinc-500">
-            Bangla-English handwriting parse kore structured notes banano hocche.
-          </p>
-        </div>
-      </div>
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <div className="h-5 w-44 animate-pulse bg-zinc-200" />
-          <div className="mt-5 space-y-3">
-            <div className="h-3 w-full animate-pulse bg-zinc-100" />
-            <div className="h-3 w-11/12 animate-pulse bg-zinc-100" />
-            <div className="h-3 w-9/12 animate-pulse bg-zinc-100" />
-            <div className="h-3 w-10/12 animate-pulse bg-zinc-100" />
+          <div className="flex items-center gap-3">
+            <span className="flex h-12 w-12 items-center justify-center bg-slate-950 text-white">
+              <ScanLine className="h-6 w-6 animate-pulse" aria-hidden="true" />
+            </span>
+            <div>
+              <h3 className="text-lg font-semibold text-slate-950">
+                Board analysis running
+              </h3>
+              <p className="text-sm text-slate-500">
+                Vision model handwriting, diagram labels, and code-like text parse korche.
+              </p>
+            </div>
+          </div>
+          <div className="mt-8 space-y-4">
+            <div className="h-4 w-2/3 animate-pulse bg-slate-200" />
+            <div className="h-4 w-full animate-pulse bg-slate-100" />
+            <div className="h-4 w-11/12 animate-pulse bg-slate-100" />
+            <div className="h-4 w-4/5 animate-pulse bg-slate-100" />
+            <div className="h-24 w-full animate-pulse bg-slate-100" />
           </div>
         </div>
-        <div className="space-y-3">
-          <div className="h-20 animate-pulse bg-zinc-100" />
-          <div className="h-20 animate-pulse bg-zinc-100" />
+        <div className="grid gap-3">
+          {['Capture', 'Reason', 'Structure'].map((step, index) => (
+            <div key={step} className="border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-8 w-8 items-center justify-center bg-white text-sm font-semibold text-slate-700">
+                  {index + 1}
+                </span>
+                <span className="text-sm font-semibold text-slate-800">
+                  {step}
+                </span>
+              </div>
+              <div className="mt-4 h-2 overflow-hidden bg-white">
+                <div
+                  className="h-full animate-progress bg-sky-500"
+                  style={{ animationDelay: `${index * 180}ms` }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   )
 }
 
-function ImageUploader({ file, previewUrl, onFileSelect, onClear, onAnalyze, loading }) {
+function ApiSettings({ settings, onChange, open, onToggle }) {
+  const apiReady = Boolean(settings.gemmaApiKey.trim())
+
+  return (
+    <section className="border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-slate-50"
+      >
+        <span className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center bg-slate-950 text-white">
+            <Settings2 className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span>
+            <span className="block text-sm font-semibold text-slate-950">
+              Gemma API Settings
+            </span>
+            <span className="mt-0.5 block text-xs text-slate-500">
+              {apiReady ? 'API key saved in this browser' : 'API key needed'}
+            </span>
+          </span>
+        </span>
+        <ChevronRight
+          className={`h-5 w-5 text-slate-500 transition ${
+            open ? 'rotate-90' : ''
+          }`}
+          aria-hidden="true"
+        />
+      </button>
+
+      {open ? (
+        <div className="space-y-4 border-t border-slate-200 p-5">
+          <label className="block">
+            <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
+              <Server className="h-3.5 w-3.5" aria-hidden="true" />
+              API URL
+            </span>
+            <input
+              type="url"
+              value={settings.gemmaApiUrl}
+              onChange={(event) =>
+                onChange({ ...settings, gemmaApiUrl: event.target.value })
+              }
+              className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-sky-500"
+              placeholder="https://provider.com/v1/openai/chat/completions"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
+              <WandSparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              Model
+            </span>
+            <input
+              type="text"
+              value={settings.gemmaModel}
+              onChange={(event) =>
+                onChange({ ...settings, gemmaModel: event.target.value })
+              }
+              className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-sky-500"
+              placeholder="google/gemma-4-E4B-it"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
+              <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
+              API Key
+            </span>
+            <input
+              type="password"
+              value={settings.gemmaApiKey}
+              onChange={(event) =>
+                onChange({ ...settings, gemmaApiKey: event.target.value })
+              }
+              className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-sky-500"
+              placeholder="Paste provider token"
+            />
+          </label>
+
+          <div className="flex items-start gap-3 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+            <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            Local prototype-er jonno key browser-e save hoy. Production deploy korle backend `.env` use korben.
+          </div>
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
+function ImageUploader({
+  file,
+  previewUrl,
+  onFileSelect,
+  onClear,
+  onAnalyze,
+  loading,
+  apiReady,
+}) {
   const uploadInputRef = useRef(null)
   const cameraInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
@@ -80,18 +224,30 @@ function ImageUploader({ file, previewUrl, onFileSelect, onClear, onAnalyze, loa
     event.preventDefault()
     setDragging(false)
     const droppedFile = event.dataTransfer.files?.[0]
-    if (droppedFile) {
-      onFileSelect(droppedFile)
-    }
+    if (droppedFile) onFileSelect(droppedFile)
   }
 
   return (
-    <section className="border border-zinc-200 bg-white p-4 md:p-5">
+    <section className="overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-200/70">
+      <div className="border-b border-slate-200 bg-slate-950 px-5 py-4 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase text-emerald-300">
+              Step 1
+            </p>
+            <h2 className="mt-1 text-lg font-semibold">Capture whiteboard</h2>
+          </div>
+          <span
+            className={`h-2.5 w-2.5 ${file ? 'bg-emerald-400' : 'bg-slate-500'}`}
+          />
+        </div>
+      </div>
+
       <div
-        className={`flex min-h-80 flex-col items-center justify-center border border-dashed px-5 py-8 text-center transition ${
+        className={`m-5 flex min-h-80 flex-col items-center justify-center border border-dashed px-5 py-8 text-center transition ${
           dragging
-            ? 'border-sky-500 bg-sky-50'
-            : 'border-zinc-300 bg-zinc-50 hover:border-zinc-400'
+            ? 'scale-[1.01] border-sky-500 bg-sky-50'
+            : 'border-slate-300 bg-slate-50 hover:border-slate-400'
         }`}
         onDragOver={(event) => {
           event.preventDefault()
@@ -102,7 +258,7 @@ function ImageUploader({ file, previewUrl, onFileSelect, onClear, onAnalyze, loa
       >
         {previewUrl ? (
           <div className="w-full">
-            <div className="relative mx-auto max-h-72 max-w-full overflow-hidden border border-zinc-200 bg-white">
+            <div className="relative mx-auto max-h-72 max-w-full overflow-hidden border border-slate-200 bg-white">
               <img
                 src={previewUrl}
                 alt="Uploaded whiteboard preview"
@@ -111,36 +267,39 @@ function ImageUploader({ file, previewUrl, onFileSelect, onClear, onAnalyze, loa
               <button
                 type="button"
                 onClick={onClear}
-                className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center bg-white text-zinc-700 shadow-sm hover:bg-zinc-100"
+                className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center bg-white text-slate-700 shadow-sm hover:bg-slate-100"
                 aria-label="Remove image"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
-            <p className="mt-3 truncate text-sm font-medium text-zinc-700">
+            <p className="mt-4 truncate text-sm font-semibold text-slate-800">
               {file?.name}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {(file?.size / 1024 / 1024).toFixed(2)} MB selected
             </p>
           </div>
         ) : (
           <>
-            <div className="flex h-14 w-14 items-center justify-center bg-zinc-950 text-white">
-              <ImageUp className="h-7 w-7" aria-hidden="true" />
-            </div>
-            <h2 className="mt-5 text-xl font-semibold text-zinc-950">
-              Whiteboard image upload korun
-            </h2>
-            <p className="mt-2 max-w-md text-sm text-zinc-500">
-              JPG, PNG, ba WebP image drag-drop korun. Mobile theke direct camera diye board capture kora jabe.
+            <span className="flex h-16 w-16 animate-float items-center justify-center bg-white text-slate-950 shadow-lg shadow-slate-300/70">
+              <ImageUp className="h-8 w-8" aria-hidden="true" />
+            </span>
+            <h3 className="mt-6 text-xl font-semibold text-slate-950">
+              Drop board image here
+            </h3>
+            <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
+              Clear JPG, PNG, ba WebP upload korun. Phone camera diye direct capture kora jabe.
             </p>
           </>
         )}
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 px-5 pb-5 sm:grid-cols-3">
         <button
           type="button"
           onClick={() => uploadInputRef.current?.click()}
-          className="inline-flex h-11 items-center justify-center gap-2 bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800"
+          className="inline-flex h-12 items-center justify-center gap-2 bg-slate-950 px-4 text-sm font-semibold text-white hover:bg-slate-800"
         >
           <UploadCloud className="h-4 w-4" aria-hidden="true" />
           Upload
@@ -148,7 +307,7 @@ function ImageUploader({ file, previewUrl, onFileSelect, onClear, onAnalyze, loa
         <button
           type="button"
           onClick={() => cameraInputRef.current?.click()}
-          className="inline-flex h-11 items-center justify-center gap-2 border border-zinc-300 bg-white px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-50"
+          className="inline-flex h-12 items-center justify-center gap-2 border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50"
         >
           <Camera className="h-4 w-4" aria-hidden="true" />
           Camera
@@ -157,7 +316,7 @@ function ImageUploader({ file, previewUrl, onFileSelect, onClear, onAnalyze, loa
           type="button"
           onClick={onAnalyze}
           disabled={!file || loading}
-          className="inline-flex h-11 items-center justify-center gap-2 bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-300"
+          className="inline-flex h-12 items-center justify-center gap-2 bg-emerald-600 px-4 text-sm font-semibold text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -166,6 +325,17 @@ function ImageUploader({ file, previewUrl, onFileSelect, onClear, onAnalyze, loa
           )}
           Analyze
         </button>
+      </div>
+
+      <div className="border-t border-slate-200 px-5 py-3">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-slate-500">API status</span>
+          <span
+            className={`font-semibold ${apiReady ? 'text-emerald-700' : 'text-amber-700'}`}
+          >
+            {apiReady ? 'Ready from settings' : 'Needs key or backend env'}
+          </span>
+        </div>
       </div>
 
       <input
@@ -199,42 +369,42 @@ function SummaryTab({ markdown }) {
   }
 
   return (
-    <article className="border border-zinc-200 bg-white p-5 text-left">
+    <article className="border border-slate-200 bg-white p-6 text-left shadow-xl shadow-slate-200/70">
       <ReactMarkdown
         components={{
           h1: ({ children }) => (
-            <h1 className="mb-4 text-2xl font-semibold text-zinc-950">
+            <h1 className="mb-4 text-2xl font-semibold text-slate-950">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="mb-3 mt-5 text-xl font-semibold text-zinc-950">
+            <h2 className="mb-3 mt-6 text-xl font-semibold text-slate-950">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="mb-2 mt-4 text-base font-semibold text-zinc-900">
+            <h3 className="mb-2 mt-5 text-base font-semibold text-slate-900">
               {children}
             </h3>
           ),
           p: ({ children }) => (
-            <p className="mb-3 text-sm leading-7 text-zinc-700">{children}</p>
+            <p className="mb-3 text-sm leading-7 text-slate-700">{children}</p>
           ),
           ul: ({ children }) => (
-            <ul className="mb-4 list-disc space-y-2 pl-6 text-sm leading-7 text-zinc-700">
+            <ul className="mb-4 list-disc space-y-2 pl-6 text-sm leading-7 text-slate-700">
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className="mb-4 list-decimal space-y-2 pl-6 text-sm leading-7 text-zinc-700">
+            <ol className="mb-4 list-decimal space-y-2 pl-6 text-sm leading-7 text-slate-700">
               {children}
             </ol>
           ),
           strong: ({ children }) => (
-            <strong className="font-semibold text-zinc-950">{children}</strong>
+            <strong className="font-semibold text-slate-950">{children}</strong>
           ),
           code: ({ children }) => (
-            <code className="bg-zinc-100 px-1.5 py-0.5 text-sm text-zinc-900">
+            <code className="bg-slate-100 px-1.5 py-0.5 text-sm text-slate-900">
               {children}
             </code>
           ),
@@ -271,16 +441,16 @@ function CodeTab({ snippets }) {
       {snippets.map((snippet, index) => (
         <section
           key={`${snippet.language}-${index}`}
-          className="overflow-hidden border border-zinc-200 bg-white"
+          className="overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-200/70"
         >
-          <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
-            <span className="text-sm font-semibold uppercase tracking-wide text-zinc-600">
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-950 px-4 py-3 text-white">
+            <span className="text-sm font-semibold uppercase">
               {snippet.language || 'text'}
             </span>
             <button
               type="button"
               onClick={() => copyCode(snippet.code, index)}
-              className="inline-flex h-9 items-center justify-center gap-2 border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
+              className="inline-flex h-9 items-center justify-center gap-2 bg-white px-3 text-sm font-medium text-slate-900 hover:bg-slate-100"
             >
               {copiedIndex === index ? (
                 <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" />
@@ -324,11 +494,8 @@ function FlashcardsTab({ flashcards }) {
   const toggleCard = (index) => {
     setFlippedCards((current) => {
       const next = new Set(current)
-      if (next.has(index)) {
-        next.delete(index)
-      } else {
-        next.add(index)
-      }
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
       return next
     })
   }
@@ -343,7 +510,7 @@ function FlashcardsTab({ flashcards }) {
             key={`${card.question}-${index}`}
             type="button"
             onClick={() => toggleCard(index)}
-            className="h-64 [perspective:1200px]"
+            className="h-64 text-left [perspective:1200px]"
             aria-pressed={flipped}
           >
             <span
@@ -351,20 +518,20 @@ function FlashcardsTab({ flashcards }) {
                 flipped ? '[transform:rotateY(180deg)]' : ''
               }`}
             >
-              <span className="absolute inset-0 flex flex-col justify-between border border-zinc-200 bg-white p-5 text-left [backface-visibility:hidden]">
-                <span className="text-xs font-semibold uppercase tracking-wide text-sky-700">
+              <span className="absolute inset-0 flex flex-col justify-between border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/70 [backface-visibility:hidden]">
+                <span className="text-xs font-semibold uppercase text-sky-700">
                   Question
                 </span>
-                <span className="text-base font-semibold leading-7 text-zinc-950">
+                <span className="text-base font-semibold leading-7 text-slate-950">
                   {card.question}
                 </span>
-                <span className="text-xs text-zinc-500">Tap to flip</span>
+                <span className="text-xs text-slate-500">Tap to flip</span>
               </span>
-              <span className="absolute inset-0 flex flex-col justify-between border border-emerald-200 bg-emerald-50 p-5 text-left [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                <span className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              <span className="absolute inset-0 flex flex-col justify-between border border-emerald-200 bg-emerald-50 p-5 shadow-xl shadow-emerald-100 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                <span className="text-xs font-semibold uppercase text-emerald-700">
                   Answer
                 </span>
-                <span className="text-sm leading-7 text-zinc-800">
+                <span className="text-sm leading-7 text-slate-800">
                   {card.answer}
                 </span>
                 <span className="text-xs text-emerald-700">Tap to return</span>
@@ -377,12 +544,27 @@ function FlashcardsTab({ flashcards }) {
   )
 }
 
+function Metric({ label, value, tone }) {
+  return (
+    <div className="border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <div className={`text-xl font-semibold ${tone}`}>{value}</div>
+      <div className="mt-1 text-xs text-slate-500">{label}</div>
+    </div>
+  )
+}
+
 function App() {
   const [file, setFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
   const [result, setResult] = useState(null)
   const [activeTab, setActiveTab] = useState('summary')
   const [loading, setLoading] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(true)
+  const [settings, setSettings] = useState(getStoredSettings)
+
+  useEffect(() => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+  }, [settings])
 
   const selectFile = (selectedFile) => {
     if (!selectedFile) return
@@ -397,9 +579,7 @@ function App() {
       return
     }
 
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl)
-    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
 
     setFile(selectedFile)
     setPreviewUrl(URL.createObjectURL(selectedFile))
@@ -407,10 +587,7 @@ function App() {
   }
 
   const clearImage = () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl)
-    }
-
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
     setFile(null)
     setPreviewUrl('')
     setResult(null)
@@ -421,6 +598,9 @@ function App() {
 
     const formData = new FormData()
     formData.append('image', file)
+    formData.append('gemmaApiUrl', settings.gemmaApiUrl)
+    formData.append('gemmaModel', settings.gemmaModel)
+    formData.append('gemmaApiKey', settings.gemmaApiKey)
     setLoading(true)
 
     try {
@@ -428,7 +608,6 @@ function App() {
         method: 'POST',
         body: formData,
       })
-
       const payload = await response.json()
 
       if (!response.ok) {
@@ -445,100 +624,137 @@ function App() {
     }
   }
 
+  const resetSettings = () => {
+    setSettings(defaultSettings)
+    toast.success('API settings reset')
+  }
+
   const renderActiveTab = () => {
     if (loading) return <LoadingPanel />
-
     if (!result) {
       return (
         <EmptyState
           icon={Sparkles}
           title="Analysis result ekhane show korbe"
-          detail="Whiteboard-er ekta clear photo upload kore Analyze press korun."
+          detail="API settings set kore whiteboard-er clear photo upload korun, then Analyze press korun."
         />
       )
     }
-
-    if (activeTab === 'code') {
-      return <CodeTab snippets={result.code_snippets ?? []} />
-    }
-
+    if (activeTab === 'code') return <CodeTab snippets={result.code_snippets ?? []} />
     if (activeTab === 'flashcards') {
       return <FlashcardsTab flashcards={result.flashcards ?? []} />
     }
-
     return <SummaryTab markdown={result.markdown_summary} />
   }
 
-  return (
-    <main className="min-h-screen bg-zinc-100 text-zinc-900">
-      <Toaster position="top-right" />
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-5 md:px-6 lg:px-8">
-        <header className="flex flex-col justify-between gap-4 border-b border-zinc-300 pb-5 md:flex-row md:items-end">
-          <div>
-            <div className="inline-flex items-center gap-2 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              Multimodal Track
-            </div>
-            <h1 className="mt-3 text-3xl font-semibold text-zinc-950 md:text-4xl">
-              Whiteboard theke study notes
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
-              Messy Bangla-English board photo upload korun. Platform summary,
-              code snippet, ebong flashcard structured output dibe.
-            </p>
-          </div>
-          <div className="grid grid-cols-3 border border-zinc-200 bg-white text-center">
-            <div className="px-4 py-3">
-              <div className="text-lg font-semibold text-zinc-950">3</div>
-              <div className="text-xs text-zinc-500">Tabs</div>
-            </div>
-            <div className="border-x border-zinc-200 px-4 py-3">
-              <div className="text-lg font-semibold text-zinc-950">8MB</div>
-              <div className="text-xs text-zinc-500">Max</div>
-            </div>
-            <div className="px-4 py-3">
-              <div className="text-lg font-semibold text-zinc-950">JSON</div>
-              <div className="text-xs text-zinc-500">Output</div>
-            </div>
-          </div>
-        </header>
+  const summaryReady = Boolean(result?.markdown_summary)
+  const codeCount = result?.code_snippets?.length ?? 0
+  const cardCount = result?.flashcards?.length ?? 0
+  const apiReady = Boolean(settings.gemmaApiKey.trim())
 
-        <div className="grid gap-5 lg:grid-cols-[420px_minmax(0,1fr)]">
-          <ImageUploader
-            file={file}
-            previewUrl={previewUrl}
-            onFileSelect={selectFile}
-            onClear={clearImage}
-            onAnalyze={analyzeImage}
-            loading={loading}
+  return (
+    <main className="min-h-screen bg-[linear-gradient(135deg,#f8fafc_0%,#eef6f4_45%,#f8f5ef_100%)] text-slate-900">
+      <Toaster position="top-right" />
+      <div className="mx-auto grid min-h-screen w-full max-w-[1500px] gap-5 px-4 py-4 lg:grid-cols-[380px_minmax(0,1fr)] lg:px-6">
+        <aside className="space-y-5">
+          <section className="overflow-hidden border border-slate-200 bg-slate-950 text-white shadow-2xl shadow-slate-300/60">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 text-xs font-semibold uppercase text-emerald-200">
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                  Multimodal Track
+                </span>
+                <Gauge className="h-5 w-5 text-sky-200" aria-hidden="true" />
+              </div>
+              <h1 className="mt-8 text-4xl font-semibold leading-tight">
+                Whiteboard to study kit
+              </h1>
+              <p className="mt-4 text-sm leading-6 text-slate-300">
+                Board photo theke clean notes, code, and flashcards ek workflow-e.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 border-t border-white/10">
+              <div className="p-4">
+                <div className="text-xl font-semibold">01</div>
+                <div className="mt-1 text-xs text-slate-400">Upload</div>
+              </div>
+              <div className="border-x border-white/10 p-4">
+                <div className="text-xl font-semibold">02</div>
+                <div className="mt-1 text-xs text-slate-400">Analyze</div>
+              </div>
+              <div className="p-4">
+                <div className="text-xl font-semibold">03</div>
+                <div className="mt-1 text-xs text-slate-400">Study</div>
+              </div>
+            </div>
+          </section>
+
+          <ApiSettings
+            settings={settings}
+            onChange={setSettings}
+            open={settingsOpen}
+            onToggle={() => setSettingsOpen((current) => !current)}
           />
 
-          <section className="min-w-0">
-            <div className="mb-3 flex overflow-x-auto border border-zinc-200 bg-white p-1">
-              {tabs.map((tab) => {
-                const Icon = tab.icon
-                const selected = activeTab === tab.id
+          <button
+            type="button"
+            onClick={resetSettings}
+            className="inline-flex h-11 w-full items-center justify-center gap-2 border border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+          >
+            <RotateCcw className="h-4 w-4" aria-hidden="true" />
+            Reset API defaults
+          </button>
+        </aside>
 
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`inline-flex h-10 min-w-max flex-1 items-center justify-center gap-2 px-4 text-sm font-semibold transition ${
-                      selected
-                        ? 'bg-zinc-950 text-white'
-                        : 'text-zinc-600 hover:bg-zinc-100'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
-                    {tab.label}
-                  </button>
-                )
-              })}
-            </div>
-            {renderActiveTab()}
-          </section>
-        </div>
+        <section className="space-y-5">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Metric
+              label="Summary"
+              value={summaryReady ? 'Ready' : 'Waiting'}
+              tone={summaryReady ? 'text-emerald-700' : 'text-slate-700'}
+            />
+            <Metric label="Code snippets" value={codeCount} tone="text-sky-700" />
+            <Metric label="Flashcards" value={cardCount} tone="text-amber-700" />
+          </div>
+
+          <div className="grid gap-5 xl:grid-cols-[440px_minmax(0,1fr)]">
+            <ImageUploader
+              file={file}
+              previewUrl={previewUrl}
+              onFileSelect={selectFile}
+              onClear={clearImage}
+              onAnalyze={analyzeImage}
+              loading={loading}
+              apiReady={apiReady}
+            />
+
+            <section className="min-w-0">
+              <div className="mb-3 grid grid-cols-3 border border-slate-200 bg-white p-1 shadow-sm">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon
+                  const selected = activeTab === tab.id
+
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`inline-flex h-12 min-w-0 items-center justify-center gap-2 px-3 text-sm font-semibold transition ${
+                        selected
+                          ? 'bg-slate-950 text-white shadow-lg shadow-slate-300'
+                          : 'text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span className="truncate">{tab.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              {renderActiveTab()}
+            </section>
+          </div>
+        </section>
       </div>
     </main>
   )
