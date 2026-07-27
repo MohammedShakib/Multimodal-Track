@@ -4,12 +4,36 @@ import boardRoutes from './routes/boardRoutes.js';
 
 const app = express();
 
+const configuredOrigins =
+  process.env.FRONTEND_ORIGIN?.split(',').map((origin) => origin.trim()) ?? [];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_ORIGIN?.split(',') ?? 'http://localhost:5173',
+    origin(origin, callback) {
+      if (
+        !origin ||
+        configuredOrigins.includes(origin) ||
+        origin === 'http://localhost:5173' ||
+        origin === 'http://127.0.0.1:5173' ||
+        origin.endsWith('.onrender.com')
+      ) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('This origin is not allowed by CORS.'));
+    },
   }),
 );
 app.use(express.json({ limit: '1mb' }));
+
+app.get('/', (_req, res) => {
+  res.json({
+    name: 'Multimodal Track API',
+    status: 'ok',
+    health: '/health',
+  });
+});
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });

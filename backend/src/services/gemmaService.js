@@ -22,6 +22,10 @@ function buildImageDataUrl(file) {
   return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
 }
 
+function buildImageBase64(file) {
+  return file.buffer.toString('base64');
+}
+
 function extractJson(text) {
   const cleaned = text
     .trim()
@@ -104,20 +108,88 @@ function getAssistantText(responseJson) {
   return typeof content === 'string' ? content.trim() : '';
 }
 
-export async function analyzeWhiteboardImage(file, config = {}) {
-  const apiUrl = config.apiUrl?.trim() || process.env.GEMMA_API_URL;
-  const apiKey = config.apiKey?.trim() || process.env.GEMMA_API_KEY;
-  const model =
-    config.model?.trim() || process.env.GEMMA_MODEL || 'google/gemma-4-E4B-it';
+function getGeminiText(responseJson) {
+  return (
+    responseJson?.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text ?? '')
+      .join('')
+      .trim() ?? ''
+  );
+}
 
-  if (!apiUrl || !apiKey || apiKey === 'replace-with-your-provider-token') {
+function isGoogleGeminiApi(apiUrl) {
+  return apiUrl.includes('generativelanguage.googleapis.com');
+}
+
+function buildGoogleGenerateContentUrl(apiUrl, model) {
+  const trimmedUrl = apiUrl.replace(/\/$/, '');
+
+  if (trimmedUrl.includes(':generateContent')) {
+    return trimmedUrl;
+  }
+
+  const normalizedModel = model.replace(/^models\//, '');
+
+  if (trimmedUrl.endsWith('/models')) {
+    return `${trimmedUrl}/${normalizedModel}:generateContent`;
+  }
+
+  return `${trimmedUrl}/models/${normalizedModel}:generateContent`;
+}
+
+async function analyzeWithGoogleGemini(file, { apiUrl, apiKey, model }) {
+  const response = await fetch(buildGoogleGenerateContentUrl(apiUrl, model), {
+    method: 'POST',
+    headers: {
+      'x-goog-api-key': apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [
+            { text: PROMPT },
+            {
+              inline_data: {
+                mime_type: file.mimetype,
+                data: buildImageBase64(file),
+              },
+            },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.2,
+        response_mime_type: 'application/json',
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
     const error = new Error(
-      'Gemma API is not configured. Add API settings in the app or set GEMMA_API_URL, GEMMA_API_KEY, and GEMMA_MODEL in backend/.env.',
+      `Google Gemini API request failed (${response.status}). ${details.slice(
+        0,
+        300,
+      )}`,
     );
-    error.statusCode = 503;
+    error.statusCode = response.status >= 500 ? 502 : 400;
     throw error;
   }
 
+  const responseJson = await response.json();
+  const assistantText = getGeminiText(responseJson);
+
+  if (!assistantText) {
+    const error = new Error('The Google Gemini response was empty.');
+    error.statusCode = 502;
+    throw error;
+  }
+
+  return normalizeAnalysis(extractJson(assistantText));
+}
+
+async function analyzeWithOpenAiCompatibleGemma(file, { apiUrl, apiKey, model }) {
   const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
@@ -162,4 +234,27 @@ export async function analyzeWhiteboardImage(file, config = {}) {
   }
 
   return normalizeAnalysis(extractJson(assistantText));
+}
+
+export async function analyzeWhiteboardImage(file, config = {}) {
+  const apiUrl =
+    config.apiUrl?.trim() ||
+    process.env.GEMMA_API_URL ||
+    'https://generativelanguage.googleapis.com/v1beta';
+  const apiKey = config.apiKey?.trim() || process.env.GEMMA_API_KEY;
+  const model = config.model?.trim() || process.env.GEMMA_MODEL || 'gemini-flash-latest';
+
+  if (!apiUrl || !apiKey || apiKey === 'replace-with-your-provider-token') {
+    const error = new Error(
+      'Gemma API is not configured. Add API settings in the app or set GEMMA_API_URL, GEMMA_API_KEY, and GEMMA_MODEL in backend/.env.',
+    );
+    error.statusCode = 503;
+    throw error;
+  }
+
+  if (isGoogleGeminiApi(apiUrl)) {
+    return analyzeWithGoogleGemini(file, { apiUrl, apiKey, model });
+  }
+
+  return analyzeWithOpenAiCompatibleGemma(file, { apiUrl, apiKey, model });
 }
