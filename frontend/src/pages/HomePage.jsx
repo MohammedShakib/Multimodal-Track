@@ -833,27 +833,18 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={() => setSettingsOpen(true)}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-            >
-              <Settings2 className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Settings</span>
-            </button>
+          <div className="flex items-center">
             <div ref={profileMenuRef} className="relative">
               <button
                 type="button"
                 onClick={() => setProfileOpen((open) => !open)}
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-300 text-slate-950 shadow-sm ring-3 ring-slate-950 transition hover:bg-amber-200"
                 aria-expanded={profileOpen}
                 aria-haspopup="menu"
                 aria-label="Open profile menu"
               >
-                <UserRound className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden max-w-36 truncate sm:inline">
-                  {user?.name || 'Profile'}
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-950 text-amber-300">
+                  <UserRound className="h-4 w-4" aria-hidden="true" />
                 </span>
               </button>
 
@@ -879,8 +870,20 @@ export default function HomePage() {
                     </div>
                     <button
                       type="button"
-                      onClick={signOut}
+                      onClick={() => {
+                        setProfileOpen(false)
+                        setSettingsOpen(true)
+                      }}
                       className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+                      role="menuitem"
+                    >
+                      <Settings2 className="h-4 w-4" aria-hidden="true" />
+                      Settings
+                    </button>
+                    <button
+                      type="button"
+                      onClick={signOut}
+                      className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
                       role="menuitem"
                     >
                       <LogOut className="h-4 w-4" aria-hidden="true" />
