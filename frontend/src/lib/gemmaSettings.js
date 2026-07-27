@@ -2,7 +2,7 @@ export const SETTINGS_KEY = 'multimodal-track-gemma-settings'
 
 export const defaultSettings = {
   gemmaApiUrl: 'https://generativelanguage.googleapis.com/v1beta',
-  gemmaModel: 'gemini-flash-latest',
+  gemmaModel: 'gemma-4-31b-it',
   gemmaApiKey: '',
 }
 
@@ -11,9 +11,10 @@ export function getStoredSettings() {
     const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
 
     if (
-      stored.gemmaApiUrl ===
+      (stored.gemmaApiUrl ===
         'https://api.deepinfra.com/v1/openai/chat/completions' &&
-      stored.gemmaModel === 'google/gemma-4-E4B-it'
+        stored.gemmaModel === 'google/gemma-4-E4B-it') ||
+      stored.gemmaModel === 'gemini-flash-latest'
     ) {
       return {
         ...defaultSettings,

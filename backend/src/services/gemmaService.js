@@ -1,6 +1,8 @@
 const PROMPT = `Analyze this messy whiteboard containing mixed Bangla and English text.
 
-Output only valid JSON containing exactly these three keys:
+Return only one raw JSON object. Do not include markdown fences, reasoning, explanations, analysis steps, or text before or after the JSON.
+
+The JSON must contain exactly these three keys:
 {
   "markdown_summary": "A concise markdown summary with headings, bullets, and bold highlights where useful.",
   "code_snippets": [
@@ -36,14 +38,55 @@ function extractJson(text) {
   try {
     return JSON.parse(cleaned);
   } catch {
-    const firstBrace = cleaned.indexOf('{');
-    const lastBrace = cleaned.lastIndexOf('}');
+    const candidates = [];
+    let depth = 0;
+    let start = -1;
+    let inString = false;
+    let escaped = false;
 
-    if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
-      throw new Error('The AI response did not include valid JSON.');
+    for (let index = 0; index < cleaned.length; index += 1) {
+      const character = cleaned[index];
+
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+
+      if (character === '\\') {
+        escaped = inString;
+        continue;
+      }
+
+      if (character === '"') {
+        inString = !inString;
+        continue;
+      }
+
+      if (inString) continue;
+
+      if (character === '{') {
+        if (depth === 0) start = index;
+        depth += 1;
+      }
+
+      if (character === '}') {
+        depth -= 1;
+        if (depth === 0 && start !== -1) {
+          candidates.push(cleaned.slice(start, index + 1));
+          start = -1;
+        }
+      }
     }
 
-    return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+    for (const candidate of candidates.reverse()) {
+      try {
+        return JSON.parse(candidate);
+      } catch {
+        // Try the next JSON-looking block.
+      }
+    }
+
+    throw new Error('The AI response did not include valid JSON.');
   }
 }
 
@@ -242,7 +285,7 @@ export async function analyzeWhiteboardImage(file, config = {}) {
     process.env.GEMMA_API_URL ||
     'https://generativelanguage.googleapis.com/v1beta';
   const apiKey = config.apiKey?.trim() || process.env.GEMMA_API_KEY;
-  const model = config.model?.trim() || process.env.GEMMA_MODEL || 'gemini-flash-latest';
+  const model = config.model?.trim() || process.env.GEMMA_MODEL || 'gemma-4-31b-it';
 
   if (!apiUrl || !apiKey || apiKey === 'replace-with-your-provider-token') {
     const error = new Error(
