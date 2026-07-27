@@ -11,6 +11,7 @@ export default function SignInPage() {
   const navigate = useNavigate()
   const { signIn } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
+  const [focused, setFocused] = useState(null)
 
   const submit = (event) => {
     event.preventDefault()
@@ -27,132 +28,199 @@ export default function SignInPage() {
     navigate('/home')
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
-  }
+  const inputStyle = (fieldName) => ({
+    width: '100%',
+    height: '46px',
+    background: '#fff',
+    border: focused === fieldName ? '1.5px solid #10b981' : '1.5px solid #e2e8f0',
+    borderRadius: '10px',
+    padding: '0 1rem',
+    fontSize: '0.9rem',
+    color: '#0f172a',
+    outline: 'none',
+    transition: 'all 0.2s',
+    boxSizing: 'border-box',
+    boxShadow: focused === fieldName ? '0 0 0 3px rgba(16,185,129,0.1)' : 'none',
+  })
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-  }
+  const labelStyle = (fieldName) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+    fontSize: '0.72rem',
+    fontWeight: 600,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: focused === fieldName ? '#10b981' : '#94a3b8',
+    marginBottom: '0.45rem',
+    transition: 'color 0.2s',
+  })
 
   return (
-    <main className="grid min-h-screen bg-slate-50 font-sans selection:bg-emerald-500/30 lg:grid-cols-[1fr_1fr]">
-      <section className="relative flex items-center justify-center px-4 py-10 md:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-white" />
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40" />
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="relative z-10 w-full max-w-md"
-        >
-          <motion.div variants={itemVariants}>
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#f8fafc',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: "'Outfit', 'Inter', system-ui, sans-serif",
+        padding: '1.5rem',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Subtle background decoration */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '-15%',
+          left: '-10%',
+          width: '50vw',
+          height: '50vw',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '-15%',
+          right: '-10%',
+          width: '40vw',
+          height: '40vw',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
+        style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}
+      >
+        {/* Card */}
+        <div className="auth-card">
+          {/* Brand */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              marginBottom: '2rem',
+              gap: '0.5rem',
+            }}
+          >
             <BrandMark />
-          </motion.div>
-          <div className="mt-12">
-            <motion.p variants={itemVariants} className="text-sm font-bold uppercase tracking-widest text-emerald-600">
-              Welcome back
-            </motion.p>
-            <motion.h1 variants={itemVariants} className="mt-3 text-4xl font-bold tracking-tight text-slate-950">
-              Sign in to continue
-            </motion.h1>
-            <motion.p variants={itemVariants} className="mt-3 text-base leading-relaxed text-slate-600">
-              Open your analyzer workspace and continue turning board photos into notes.
-            </motion.p>
+            <span
+              style={{
+                fontSize: '1rem',
+                fontWeight: 700,
+                color: '#0f172a',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Multimodal Track
+            </span>
           </div>
-          <motion.form variants={itemVariants} onSubmit={submit} className="mt-10 space-y-5">
-            <label className="block group">
-              <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition-colors group-focus-within:text-emerald-600">
-                <Mail className="h-4 w-4" aria-hidden="true" />
+
+          {/* Heading */}
+          <div style={{ marginBottom: '1.75rem', textAlign: 'center' }}>
+            <h1
+              style={{
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                color: '#0f172a',
+                letterSpacing: '-0.02em',
+                margin: 0,
+                lineHeight: 1.25,
+              }}
+            >
+              Welcome back
+            </h1>
+            <p style={{ marginTop: '0.4rem', fontSize: '0.875rem', color: '#94a3b8', lineHeight: 1.6 }}>
+              Sign in to continue to your workspace.
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={labelStyle('email')}>
+                <Mail size={12} />
                 Email
-              </span>
+              </label>
               <input
                 type="email"
                 value={form.email}
-                onChange={(event) =>
-                  setForm({ ...form, email: event.target.value })
-                }
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20"
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onFocus={() => setFocused('email')}
+                onBlur={() => setFocused(null)}
                 placeholder="you@example.com"
+                style={inputStyle('email')}
               />
-            </label>
-            <label className="block group">
-              <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition-colors group-focus-within:text-emerald-600">
-                <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+            </div>
+
+            <div>
+              <label style={labelStyle('password')}>
+                <LockKeyhole size={12} />
                 Password
-              </span>
+              </label>
               <input
                 type="password"
                 value={form.password}
-                onChange={(event) =>
-                  setForm({ ...form, password: event.target.value })
-                }
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20"
-                placeholder="Minimum 6 characters"
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                onFocus={() => setFocused('password')}
+                onBlur={() => setFocused(null)}
+                placeholder="Min 6 characters"
+                style={inputStyle('password')}
               />
-            </label>
+            </div>
+
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
               type="submit"
-              className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-slate-800 hover:shadow-slate-900/30"
+              style={{
+                marginTop: '0.25rem',
+                width: '100%',
+                height: '46px',
+                background: '#0f172a',
+                border: 'none',
+                borderRadius: '10px',
+                color: '#fff',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                letterSpacing: '0.01em',
+                boxShadow: '0 2px 12px rgba(15,23,42,0.15)',
+                transition: 'background 0.2s',
+              }}
             >
               Sign in
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              <ArrowRight size={16} />
             </motion.button>
-          </motion.form>
-          <motion.p variants={itemVariants} className="mt-8 text-center text-sm font-medium text-slate-600">
-            New here?{' '}
-            <Link to="/sign-up" className="font-bold text-emerald-600 hover:text-emerald-500 transition-colors">
-              Create an account
+          </form>
+
+          {/* Footer */}
+          <p style={{ marginTop: '1.4rem', textAlign: 'center', fontSize: '0.85rem', color: '#94a3b8' }}>
+            Don't have an account?{' '}
+            <Link
+              to="/sign-up"
+              style={{ color: '#10b981', fontWeight: 600, textDecoration: 'none' }}
+            >
+              Create one
             </Link>
-          </motion.p>
-        </motion.div>
-      </section>
-      
-      <section className="relative hidden overflow-hidden bg-slate-950 p-8 text-white lg:block">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(52,211,153,0.15),transparent_40%),radial-gradient(circle_at_20%_80%,rgba(56,189,248,0.1),transparent_40%)]" />
-        <div className="relative z-10 flex h-full flex-col justify-between rounded-3xl border border-white/10 bg-white/5 p-12 backdrop-blur-xl shadow-2xl">
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Study dashboard
-            </p>
-            <h2 className="mt-6 text-5xl font-bold leading-tight tracking-tight text-white">
-              Your notes, code, and flashcards stay <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sky-400">one click away.</span>
-            </h2>
-          </motion.div>
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            className="grid gap-4 mt-12"
-          >
-            {['Upload board', 'Review markdown', 'Practice cards'].map(
-              (item, index) => (
-                <motion.div 
-                  variants={itemVariants}
-                  key={item} 
-                  className="group flex items-center gap-4 rounded-2xl bg-white/5 p-4 border border-white/10 transition-all hover:bg-white/10 hover:scale-[1.02]"
-                >
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-base font-bold text-slate-950 shadow-md group-hover:bg-emerald-400 transition-colors">
-                    {index + 1}
-                  </span>
-                  <span className="text-lg font-semibold text-slate-200">{item}</span>
-                </motion.div>
-              ),
-            )}
-          </motion.div>
+          </p>
         </div>
-      </section>
+      </motion.div>
     </main>
   )
 }

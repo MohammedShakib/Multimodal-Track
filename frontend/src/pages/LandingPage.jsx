@@ -18,111 +18,172 @@ const features = [
     title: 'Bangla + English board parsing',
     detail: 'Mixed handwriting, arrows, keywords, and topic clusters ke structured output-e convert kore.',
     icon: ScanLine,
+    accent: '#10b981',
+    bg: '#f0fdf4',
   },
   {
     title: 'Markdown study summary',
     detail: 'Headings, bullets, and highlighted terms ready hoy class note ba revision-er jonno.',
     icon: FileText,
+    accent: '#3b82f6',
+    bg: '#eff6ff',
   },
   {
     title: 'Code extraction',
     detail: 'Pseudocode, formulas, and code-like blocks syntax highlighted snippet hisebe render hoy.',
     icon: Code2,
+    accent: '#8b5cf6',
+    bg: '#f5f3ff',
   },
   {
     title: 'Interactive flashcards',
     detail: 'Whiteboard topic theke Q&A cards generate hoy quick recall practice-er jonno.',
     icon: Layers,
+    accent: '#f59e0b',
+    bg: '#fffbeb',
   },
 ]
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-    },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 }
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 }
 
 function PreviewPanel() {
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-      className="relative mx-auto w-full max-w-xl rounded-3xl border border-white/20 bg-white/5 p-4 shadow-2xl shadow-emerald-900/20 backdrop-blur-xl"
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+      style={{
+        width: '100%',
+        maxWidth: '520px',
+        background: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '20px',
+        padding: '1.25rem',
+        boxShadow: '0 8px 40px rgba(15,23,42,0.08), 0 2px 8px rgba(15,23,42,0.04)',
+      }}
     >
-      <div className="grid gap-4 md:grid-cols-[1fr_1.25fr]">
-        <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4 shadow-inner">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-300">
+
+      <div className="preview-inner">
+        {/* Left: capture panel */}
+        <div
+          style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '1rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#10b981' }}>
               Capture
             </span>
-            <Camera className="h-4 w-4 text-slate-400" aria-hidden="true" />
+            <Camera size={14} color="#94a3b8" />
           </div>
-          <div className="mt-4 overflow-hidden rounded-xl aspect-[4/3] border border-dashed border-slate-600 bg-gradient-to-br from-slate-800 to-slate-900 p-4 relative">
-            <motion.div 
-              animate={{ 
-                backgroundPosition: ['0% 0%', '100% 100%'],
-              }}
-              transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse' }}
-              className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.4)_0,transparent_50%)]"
-            />
-            <div className="relative z-10">
-              <div className="h-2 w-24 rounded-full bg-slate-600" />
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                <motion.div whileHover={{ scale: 1.05 }} className="h-14 rounded-lg bg-emerald-400/80 shadow-[0_0_15px_rgba(52,211,153,0.3)]" />
-                <motion.div whileHover={{ scale: 1.05 }} className="h-20 rounded-lg bg-sky-400/80 shadow-[0_0_15px_rgba(56,189,248,0.3)]" />
-                <motion.div whileHover={{ scale: 1.05 }} className="h-12 rounded-lg bg-amber-400/80 shadow-[0_0_15px_rgba(251,191,36,0.3)]" />
+          <div
+            style={{
+              marginTop: '0.75rem',
+              borderRadius: '10px',
+              aspectRatio: '4/3',
+              border: '1.5px dashed #cbd5e1',
+              background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+              padding: '0.75rem',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ height: '6px', width: '60%', borderRadius: '99px', background: '#cbd5e1' }} />
+              <div style={{ marginTop: '0.6rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.3rem' }}>
+                <div style={{ height: '36px', borderRadius: '6px', background: 'rgba(16,185,129,0.5)' }} />
+                <div style={{ height: '48px', borderRadius: '6px', background: 'rgba(59,130,246,0.5)' }} />
+                <div style={{ height: '30px', borderRadius: '6px', background: 'rgba(245,158,11,0.5)' }} />
               </div>
-              <div className="mt-5 space-y-2">
-                <div className="h-2 w-full rounded-full bg-slate-500" />
-                <div className="h-2 w-3/4 rounded-full bg-slate-600" />
+              <div style={{ marginTop: '0.6rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ height: '5px', borderRadius: '99px', background: '#cbd5e1', width: '100%' }} />
+                <div style={{ height: '5px', borderRadius: '99px', background: '#e2e8f0', width: '75%' }} />
               </div>
             </div>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             type="button"
-            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-emerald-400 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.2)]"
+            style={{
+              marginTop: '0.75rem',
+              width: '100%',
+              height: '36px',
+              background: '#0f172a',
+              border: 'none',
+              borderRadius: '8px',
+              color: '#fff',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.35rem',
+            }}
           >
-            <UploadCloud className="h-4 w-4" aria-hidden="true" />
+            <UploadCloud size={13} />
             Analyze board
-          </motion.button>
+          </button>
         </div>
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-white/10 bg-white/95 p-4 text-slate-900 shadow-lg">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-600">
-              <FileText className="h-4 w-4" aria-hidden="true" />
+
+        {/* Right: output panels */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {/* Summary */}
+          <div
+            style={{
+              background: '#fff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '0.85rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#3b82f6' }}>
+              <FileText size={11} />
               Summary
             </div>
-            <div className="mt-4 space-y-3">
-              <div className="h-3 w-3/4 rounded-full bg-slate-800" />
-              <div className="space-y-2">
-                <div className="h-2 w-full rounded-full bg-slate-200" />
-                <div className="h-2 w-11/12 rounded-full bg-slate-200" />
-                <div className="h-2 w-2/3 rounded-full bg-slate-200" />
-              </div>
+            <div style={{ marginTop: '0.6rem', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <div style={{ height: '7px', width: '70%', borderRadius: '99px', background: '#1e293b' }} />
+              <div style={{ height: '5px', width: '100%', borderRadius: '99px', background: '#e2e8f0' }} />
+              <div style={{ height: '5px', width: '90%', borderRadius: '99px', background: '#e2e8f0' }} />
+              <div style={{ height: '5px', width: '65%', borderRadius: '99px', background: '#e2e8f0' }} />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 text-white shadow-lg backdrop-blur-md">
-              <Code2 className="h-5 w-5 text-emerald-300" aria-hidden="true" />
-              <div className="mt-5 h-2 w-20 rounded-full bg-emerald-400/50" />
-              <div className="mt-2 h-2 w-14 rounded-full bg-emerald-400/30" />
+
+          {/* Bottom two */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div
+              style={{
+                background: '#f5f3ff',
+                border: '1px solid #ede9fe',
+                borderRadius: '12px',
+                padding: '0.75rem',
+              }}
+            >
+              <Code2 size={16} color="#8b5cf6" />
+              <div style={{ marginTop: '0.5rem', height: '5px', width: '80%', borderRadius: '99px', background: 'rgba(139,92,246,0.3)' }} />
+              <div style={{ marginTop: '4px', height: '5px', width: '55%', borderRadius: '99px', background: 'rgba(139,92,246,0.2)' }} />
             </div>
-            <div className="rounded-2xl border border-amber-200/20 bg-gradient-to-br from-amber-100 to-amber-50 p-4 text-slate-950 shadow-lg">
-              <Layers className="h-5 w-5 text-amber-600" aria-hidden="true" />
-              <div className="mt-3 text-3xl font-bold tracking-tight text-amber-950">12</div>
-              <div className="text-xs font-medium text-amber-700/80">Flashcards</div>
+            <div
+              style={{
+                background: '#fffbeb',
+                border: '1px solid #fde68a',
+                borderRadius: '12px',
+                padding: '0.75rem',
+              }}
+            >
+              <Layers size={16} color="#f59e0b" />
+              <div style={{ marginTop: '0.4rem', fontSize: '1.4rem', fontWeight: 800, color: '#92400e', lineHeight: 1 }}>12</div>
+              <div style={{ fontSize: '0.6rem', fontWeight: 600, color: '#b45309', marginTop: '1px' }}>Flashcards</div>
             </div>
           </div>
         </div>
@@ -131,173 +192,393 @@ function PreviewPanel() {
   )
 }
 
-function HeroLogoMark() {
-  return (
-    <motion.div
-      variants={itemVariants}
-      className="h-16 w-16 shrink-0 md:h-20 md:w-20"
-      aria-hidden="true"
-    >
-      <img
-        src={logoMarkUrl}
-        alt=""
-        className="h-full w-full object-contain drop-shadow-[0_0_28px_rgba(14,165,233,0.35)]"
-      />
-    </motion.div>
-  )
-}
-
 export default function LandingPage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-slate-950 text-white font-sans selection:bg-emerald-500/30">
-      <section className="relative">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(45,212,191,0.15),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(251,191,36,0.12),transparent_30%),linear-gradient(135deg,#020617_0%,#0a0f1c_50%,#0f172a_100%)]" />
-          <motion.div 
-            animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.05, 1] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 left-1/4 h-[40rem] w-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[120px]" 
-          />
-          <motion.div 
-            animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.1, 1] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-0 right-0 h-[30rem] w-[30rem] translate-x-1/3 translate-y-1/3 rounded-full bg-sky-500/10 blur-[100px]" 
-          />
-        </div>
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#f8fafc',
+        color: '#0f172a',
+        fontFamily: "'Outfit', 'Inter', system-ui, sans-serif",
+        overflowX: 'hidden',
+      }}
+    >
+      {/* ── NAV ────────────────────────────────────── */}
+      <nav className="landing-nav">
+        {/* Brand */}
+        <motion.div
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}
+        >
+          <img src={logoMarkUrl} alt="" style={{ height: '32px', width: '32px', objectFit: 'contain' }} />
+          <span className="nav-brand-text">
+            Multimodal Track
+          </span>
+        </motion.div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 py-6 md:px-6 lg:px-8">
-          <nav className="flex items-center justify-end">
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }} 
-              animate={{ opacity: 1, x: 0 }} 
-              transition={{ duration: 0.5 }}
-              className="flex items-center gap-4"
-            >
-              <Link
-                to="/sign-in"
-                className="hidden items-center justify-center px-4 py-2 text-sm font-semibold text-slate-300 transition-colors hover:text-white sm:inline-flex"
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/sign-up"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-lg transition-all hover:scale-105 hover:bg-emerald-50 hover:shadow-emerald-500/20"
-              >
-                Get started
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </motion.div>
-          </nav>
+        {/* Actions */}
+        <motion.div
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+        >
+          <Link
+            to="/sign-in"
+            style={{
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              color: '#64748b',
+              textDecoration: 'none',
+              padding: '0.4rem 0.75rem',
+              borderRadius: '8px',
+              transition: 'color 0.2s',
+            }}
+          >
+            Sign in
+          </Link>
+          <Link
+            to="/sign-up"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              color: '#fff',
+              background: '#0f172a',
+              textDecoration: 'none',
+              padding: '0.5rem 1.1rem',
+              borderRadius: '8px',
+              boxShadow: '0 2px 8px rgba(15,23,42,0.15)',
+              transition: 'background 0.2s',
+            }}
+          >
+            Get started
+            <ArrowRight size={14} />
+          </Link>
+        </motion.div>
+      </nav>
 
-          <div className="grid min-h-[calc(100vh-100px)] items-center gap-16 py-16 lg:grid-cols-[1fr_1.1fr]">
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="max-w-2xl"
+      {/* ── HERO ────────────────────────────────────── */}
+      <section className="landing-hero">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          style={{ maxWidth: '560px' }}
+        >
+          {/* Badge */}
+          <motion.div variants={itemVariants}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                letterSpacing: '0.07em',
+                textTransform: 'uppercase',
+                color: '#10b981',
+                background: '#f0fdf4',
+                border: '1px solid #d1fae5',
+                borderRadius: '99px',
+                padding: '0.3rem 0.85rem',
+              }}
             >
-              <div className="flex items-center gap-4">
-                <HeroLogoMark />
-                <motion.div variants={itemVariants} className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-300 backdrop-blur-sm">
-                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                  AI study workspace
-                </motion.div>
+              <Sparkles size={11} />
+              AI study workspace
+            </span>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            variants={itemVariants}
+            style={{
+              marginTop: '1.25rem',
+              fontSize: 'clamp(2.2rem, 5vw, 3.5rem)',
+              fontWeight: 800,
+              lineHeight: 1.12,
+              letterSpacing: '-0.03em',
+              color: '#0f172a',
+            }}
+          >
+            Turn messy{' '}
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              whiteboards
+            </span>{' '}
+            into study-ready notes.
+          </motion.h1>
+
+          {/* Subtext */}
+          <motion.p
+            variants={itemVariants}
+            style={{
+              marginTop: '1.25rem',
+              fontSize: '1rem',
+              lineHeight: 1.75,
+              color: '#64748b',
+              maxWidth: '440px',
+            }}
+          >
+            Upload a Bangla-English board photo and get a clean summary,
+            highlighted code snippets, and flashcards in one focused student workflow.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div variants={itemVariants} className="hero-ctas">
+            <Link
+              to="/sign-up"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                height: '48px',
+                padding: '0 1.75rem',
+                background: '#0f172a',
+                color: '#fff',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                borderRadius: '10px',
+                textDecoration: 'none',
+                boxShadow: '0 4px 16px rgba(15,23,42,0.18)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+              }}
+            >
+              Start free
+              <ArrowRight size={16} />
+            </Link>
+            <Link
+              to="/sign-in"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                height: '48px',
+                padding: '0 1.75rem',
+                background: '#fff',
+                color: '#0f172a',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                borderRadius: '10px',
+                textDecoration: 'none',
+                border: '1.5px solid #e2e8f0',
+                boxShadow: '0 2px 6px rgba(15,23,42,0.05)',
+                transition: 'border-color 0.2s',
+              }}
+            >
+              Sign in
+            </Link>
+          </motion.div>
+
+          {/* Trust pills */}
+          <motion.div variants={itemVariants} className="hero-trust">
+            {['Camera upload', 'Gemma AI', 'Mobile-first'].map((item) => (
+              <div
+                key={item}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', fontWeight: 500, color: '#64748b' }}
+              >
+                <CheckCircle2 size={15} color="#10b981" />
+                {item}
               </div>
-              <motion.h1 variants={itemVariants} className="mt-8 text-5xl font-bold leading-[1.15] tracking-tight md:text-6xl lg:text-7xl">
-                Turn messy <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sky-400">whiteboards</span> into study-ready notes.
-              </motion.h1>
-              <motion.p variants={itemVariants} className="mt-6 text-lg leading-relaxed text-slate-300/90 md:text-xl">
-                Upload a Bangla-English board photo and get a clean summary,
-                highlighted code snippets, and flashcards in one focused
-                student workflow.
-              </motion.p>
-              <motion.div variants={itemVariants} className="mt-10 flex flex-col gap-4 sm:flex-row">
-                <Link
-                  to="/sign-up"
-                  className="inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-8 text-base font-semibold text-slate-950 shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1 hover:bg-emerald-300 hover:shadow-emerald-500/40"
-                >
-                  Start free
-                  <ArrowRight className="h-5 w-5" aria-hidden="true" />
-                </Link>
-                <Link
-                  to="/sign-in"
-                  className="inline-flex h-14 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-8 text-base font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-1 hover:bg-white/10 hover:border-white/20"
-                >
-                  Sign in
-                </Link>
-              </motion.div>
-              <motion.div variants={itemVariants} className="mt-12 flex flex-wrap gap-x-8 gap-y-4 text-sm font-medium text-slate-400">
-                {['Camera upload', 'Gemma settings', 'Mobile-first'].map((item) => (
-                  <div key={item} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400" aria-hidden="true" />
-                    {item}
-                  </div>
-                ))}
-              </motion.div>
-            </motion.div>
-            <PreviewPanel />
-          </div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* Preview */}
+        <div className="preview-panel-wrap">
+          <PreviewPanel />
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-white px-4 py-24 text-slate-950 md:px-6 lg:px-8">
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-30" />
-        <div className="relative mx-auto max-w-7xl">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+      {/* ── FEATURES ────────────────────────────────── */}
+      <section className="landing-features-section">
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          {/* Section heading */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col justify-between gap-6 md:flex-row md:items-end"
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.5 }}
+            className="landing-features-header"
           >
-            <div className="max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-widest text-emerald-600">
+            <div style={{ maxWidth: '520px' }}>
+              <p
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.09em',
+                  textTransform: 'uppercase',
+                  color: '#10b981',
+                  margin: 0,
+                }}
+              >
                 Dynamic workflow
               </p>
-              <h2 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
+              <h2
+                style={{
+                  marginTop: '0.5rem',
+                  fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+                  fontWeight: 800,
+                  letterSpacing: '-0.025em',
+                  color: '#0f172a',
+                  lineHeight: 1.2,
+                }}
+              >
                 Everything a student expects after class
               </h2>
             </div>
             <Link
               to="/sign-up"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 text-sm font-semibold text-white shadow-lg transition-transform hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/20"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                height: '44px',
+                padding: '0 1.5rem',
+                background: '#0f172a',
+                color: '#fff',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                borderRadius: '10px',
+                textDecoration: 'none',
+                boxShadow: '0 2px 10px rgba(15,23,42,0.12)',
+              }}
             >
               Create account
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              <ArrowRight size={15} />
             </Link>
           </motion.div>
 
-          <motion.div 
+          {/* Feature cards */}
+          <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4"
+            viewport={{ once: true, margin: '-60px' }}
+            className="landing-features-grid"
           >
             {features.map((feature) => {
               const Icon = feature.icon
               return (
                 <motion.article
-                  variants={itemVariants}
-                  whileHover={{ y: -8 }}
                   key={feature.title}
-                  className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-8 shadow-lg shadow-slate-200/50 transition-all hover:shadow-2xl hover:shadow-slate-200/80 hover:border-emerald-200"
+                  variants={itemVariants}
+                  whileHover={{ y: -4 }}
+                  style={{
+                    background: '#fff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '16px',
+                    padding: '1.75rem',
+                    boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+                    transition: 'box-shadow 0.25s, border-color 0.25s',
+                    cursor: 'default',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = feature.accent + '55'
+                    e.currentTarget.style.boxShadow = `0 8px 24px rgba(15,23,42,0.08)`
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#e2e8f0'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(15,23,42,0.04)'
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/0 to-emerald-50/0 transition-colors group-hover:from-emerald-50/50 group-hover:to-transparent" />
-                  <div className="relative z-10">
-                    <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-md transition-transform group-hover:scale-110 group-hover:bg-emerald-500">
-                      <Icon className="h-6 w-6" aria-hidden="true" />
-                    </span>
-                    <h3 className="mt-6 text-xl font-bold text-slate-900">{feature.title}</h3>
-                    <p className="mt-3 text-base leading-relaxed text-slate-600">
-                      {feature.detail}
-                    </p>
-                  </div>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '12px',
+                      background: feature.bg,
+                      color: feature.accent,
+                    }}
+                  >
+                    <Icon size={22} />
+                  </span>
+                  <h3
+                    style={{
+                      marginTop: '1rem',
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      color: '#0f172a',
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {feature.title}
+                  </h3>
+                  <p
+                    style={{
+                      marginTop: '0.5rem',
+                      fontSize: '0.875rem',
+                      lineHeight: 1.7,
+                      color: '#64748b',
+                    }}
+                  >
+                    {feature.detail}
+                  </p>
                 </motion.article>
               )
             })}
           </motion.div>
         </div>
+      </section>
+
+      {/* ── FOOTER CTA ──────────────────────────────── */}
+      <section style={{ padding: '5rem 1.5rem', textAlign: 'center' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          style={{ maxWidth: '560px', margin: '0 auto' }}
+        >
+          <h2
+            style={{
+              fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+              fontWeight: 800,
+              letterSpacing: '-0.025em',
+              color: '#0f172a',
+              lineHeight: 1.2,
+            }}
+          >
+            Ready to study smarter?
+          </h2>
+          <p style={{ marginTop: '0.75rem', fontSize: '1rem', color: '#64748b', lineHeight: 1.7 }}>
+            Take a photo of your board and let AI do the rest.
+          </p>
+          <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <Link
+              to="/sign-up"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                height: '48px',
+                padding: '0 2rem',
+                background: '#0f172a',
+                color: '#fff',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                borderRadius: '10px',
+                textDecoration: 'none',
+                boxShadow: '0 4px 16px rgba(15,23,42,0.18)',
+              }}
+            >
+              Get started free
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </motion.div>
       </section>
     </main>
   )
