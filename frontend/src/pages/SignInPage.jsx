@@ -15,17 +15,31 @@ export default function SignInPage() {
 
   const submit = (event) => {
     event.preventDefault()
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      toast.error('Enter a valid email address.')
-      return
+
+    // Super admin: skip email validation
+    const isSadmin =
+      form.email === 'sadmin' && form.password === 'sadmin'
+
+    if (!isSadmin) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+        toast.error('Enter a valid email address.')
+        return
+      }
+      if (form.password.length < 6) {
+        toast.error('Password must be at least 6 characters.')
+        return
+      }
     }
-    if (form.password.length < 6) {
-      toast.error('Password must be at least 6 characters.')
-      return
+
+    const result = signIn({ email: form.email, password: form.password })
+
+    if (result?.isSuperAdmin) {
+      toast.success('Super Admin access granted')
+      navigate('/super-admin')
+    } else {
+      toast.success('Signed in')
+      navigate('/home')
     }
-    signIn({ email: form.email })
-    toast.success('Signed in')
-    navigate('/home')
   }
 
   const inputStyle = (fieldName) => ({
@@ -154,7 +168,7 @@ export default function SignInPage() {
                 Email
               </label>
               <input
-                type="email"
+                type="text"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 onFocus={() => setFocused('email')}

@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage.jsx'
 import LandingPage from './pages/LandingPage.jsx'
 import SignInPage from './pages/SignInPage.jsx'
 import SignUpPage from './pages/SignUpPage.jsx'
+import SuperAdminPage from './pages/SuperAdminPage.jsx'
 
 function RouteView() {
   const { user } = useAuth()
@@ -19,6 +20,14 @@ function RouteView() {
       return null
     }
     return <HomePage />
+  }
+
+  if (pathname === '/super-admin') {
+    if (!user?.isSuperAdmin) {
+      queueMicrotask(() => navigate('/sign-in', { replace: true }))
+      return null
+    }
+    return <SuperAdminPage />
   }
 
   if (pathname === '/sign-in') return <SignInPage />
