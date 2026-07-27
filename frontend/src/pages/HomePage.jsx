@@ -53,6 +53,51 @@ const staggerContainer = {
   visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
 }
 
+function getUserInitials(user) {
+  const source = user?.name?.trim() || user?.email?.split('@')[0] || ''
+  const parts = source
+    .replace(/[^a-zA-Z0-9\s._-]/g, '')
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+
+  if (!parts.length) return ''
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase()
+  }
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+}
+
+function ProfileAvatar({ user }) {
+  const initials = getUserInitials(user)
+
+  if (user?.avatarUrl) {
+    return (
+      <img
+        src={user.avatarUrl}
+        alt=""
+        className="h-full w-full rounded-full object-cover"
+        aria-hidden="true"
+      />
+    )
+  }
+
+  if (initials) {
+    return (
+      <span className="text-sm font-semibold tracking-wide text-slate-800">
+        {initials}
+      </span>
+    )
+  }
+
+  return <UserRound className="h-5 w-5 text-slate-600" aria-hidden="true" />
+}
+
 function EmptyState({ icon: Icon, title, detail }) {
   return (
     <motion.div
@@ -838,14 +883,12 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setProfileOpen((open) => !open)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-300 text-slate-950 shadow-sm ring-3 ring-slate-950 transition hover:bg-amber-200"
+                className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-300 bg-white shadow-sm transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-3 focus:ring-slate-300/60"
                 aria-expanded={profileOpen}
                 aria-haspopup="menu"
                 aria-label="Open profile menu"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-950 text-amber-300">
-                  <UserRound className="h-4 w-4" aria-hidden="true" />
-                </span>
+                <ProfileAvatar user={user} />
               </button>
 
               <AnimatePresence>
