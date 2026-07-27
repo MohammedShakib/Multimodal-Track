@@ -1,26 +1,54 @@
 import { useContext, useEffect, useMemo, useState } from 'react'
 import RouterContext from './routerContext.js'
 
+function normalizePath(path) {
+  if (!path || path === '#') return '/'
+  const withoutHash = path.startsWith('#') ? path.slice(1) : path
+  return withoutHash.startsWith('/') ? withoutHash : `/${withoutHash}`
+}
+
+function getCurrentPathname() {
+  if (window.location.hash.startsWith('#/')) {
+    return normalizePath(window.location.hash)
+  }
+
+  return normalizePath(window.location.pathname)
+}
+
+function pathToUrl(path) {
+  const normalizedPath = normalizePath(path)
+  return normalizedPath === '/' ? '/' : `/#${normalizedPath}`
+}
+
 export function RouterProvider({ children }) {
-  const [pathname, setPathname] = useState(() => window.location.pathname)
+  const [pathname, setPathname] = useState(getCurrentPathname)
 
   useEffect(() => {
-    const handlePopState = () => setPathname(window.location.pathname)
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
+    const handleLocationChange = () => setPathname(getCurrentPathname())
+
+    window.addEventListener('hashchange', handleLocationChange)
+    window.addEventListener('popstate', handleLocationChange)
+
+    return () => {
+      window.removeEventListener('hashchange', handleLocationChange)
+      window.removeEventListener('popstate', handleLocationChange)
+    }
   }, [])
 
   const value = useMemo(
     () => ({
       pathname,
       navigate: (to, options = {}) => {
-        if (to === window.location.pathname) return
+        const nextPathname = normalizePath(to)
+        if (nextPathname === getCurrentPathname()) return
+
+        const nextUrl = pathToUrl(nextPathname)
         if (options.replace) {
-          window.history.replaceState({}, '', to)
+          window.history.replaceState({}, '', nextUrl)
         } else {
-          window.history.pushState({}, '', to)
+          window.history.pushState({}, '', nextUrl)
         }
-        setPathname(to)
+        setPathname(nextPathname)
         window.scrollTo({ top: 0, behavior: 'smooth' })
       },
     }),
@@ -35,7 +63,7 @@ export function Link({ to, children, ...props }) {
 
   return (
     <a
-      href={to}
+      href={pathToUrl(to)}
       {...props}
       onClick={(event) => {
         props.onClick?.(event)
